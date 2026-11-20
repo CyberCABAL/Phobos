@@ -3939,6 +3939,41 @@ KeepRange.AllowPlayer=        ; boolean, default to [General] -> KeepRange.Allow
 KeepRange.EarlyStopFrame=     ; integer, default to [General] -> KeepRange.EarlyStopFrame
 ```
 
+### Laser wave shape customization
+
+- You can now customize how the laser waves created by Ares' `Wave.IsLaser` and `Wave.IsBigLaser` are drawn. These waves are drawn as a long six-sided shape: a pointed tip at each end of the beam, and two side corners per end that set how wide the beam is.
+- `Wave.Shape` sets the outline of the beam.
+  - The first two values are the full width of the beam at the firer end and at the target end, in leptons. Different values give a tapered beam.
+  - The last two values are the length of the pointed tip at the firer end and at the target end, in leptons, measured along the beam from the side corners to the tip. `0` gives a flat end.
+  - If the second value of a pair is left out, it repeats the first. For example, `Wave.Shape=60` sets both widths to 60, and `Wave.Shape=40,120,10` sets both tips to 10.
+  - Values that are not set keep the default shape. `Wave.IsLaser` waves are 88 leptons wide with 34 lepton tips. `Wave.IsBigLaser` waves are 68 leptons wide with 27 lepton tips. Despite its name, `Wave.IsBigLaser` is the narrower one.
+  - Each value must be between `0` and `2560` (10 cells). Values outside that range are clamped and a warning is written to the debug log.
+  - The tips are shortened while the beam is drawn when the shape could not be drawn as given:
+    - If both tips together are longer than the beam, both are shortened in proportion.
+    - On a tapered beam, a long tip at the narrow end would make the outline bend inward, and the game can only draw outlines that do not. The tip at the narrow end is shortened just enough to prevent this.
+- `Wave.ExtraDraw` sets how far the beam is drawn beyond the firer and the target. By default the beam is not drawn exactly between the firer's FLH and the target: it is extended at both ends by 5% of the distance between them, so it starts behind the FLH and ends past the target, more so the further away the target is.
+  - The first value is the extension at the firer end and the second the extension at the target end, each as a percentage of the distance between the FLH and the target. `0%` makes the beam start exactly at the FLH, or end exactly at the target, at any range. The beam's pointed tip starts there, so the beam reaches its full width one tip length further in.
+  - If the second value is left out, it repeats the first. For example, `Wave.ExtraDraw=0%` removes both extensions, and `Wave.ExtraDraw=0%,5%` only removes the one at the firer end.
+  - Write the values as percentages, such as `5%`. A number without `%` is read as a multiplier, so `0.05` also means 5%, but `5` means 500%.
+  - Each value must be between `0%` and `100%`. Values outside that range are clamped and a warning is written to the debug log.
+- If Ares draws the wave reversed because of its `Wave.ReverseAgainst*` tags, the firer end values of `Wave.Shape` and `Wave.ExtraDraw` apply to the target end and the other way round.
+- The cells affected by the weapon's `AmbientDamage` are calculated from the drawn beam, so `Wave.Shape` and `Wave.ExtraDraw` can change which cells take ambient damage.
+- `Wave.MinimumLength` sets how close the target can be for the beam to be drawn. The game does not create a wave at all when the firer's FLH is less than this many leptons from the target, measured horizontally, so a weapon fired at a very close target shows no beam. By default this is 240 leptons, which can hide the beam when firing at an adjacent cell.
+  - The value must be between `100` and `2560` leptons. Values outside that range are clamped and a warning is written to the debug log. The beam needs room for its two tips, and a beam of zero length cannot be drawn.
+- Sonic (`IsSonic=yes`) and magnetron (`IsMagBeam=yes`) waves are not affected.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWEAPON]            ; WeaponType
+Wave.Shape=             ; list of integers - firer end width, target end width, firer end tip length, target end tip length, in leptons (0-2560)
+Wave.ExtraDraw=5%,5%    ; list of floating point values, percents or absolute (0%-100%) - firer end, target end
+Wave.MinimumLength=240  ; integer, in leptons (100-2560)
+```
+
+```{note}
+`Wave.IsLaser` and `Wave.IsBigLaser` are Ares features, so this requires Ares.
+```
+
 ### Make units try turning to target when firing with `OmniFire=yes`
 
 - The unit will try to turn the body to target even firing with `OmniFire=yes`.

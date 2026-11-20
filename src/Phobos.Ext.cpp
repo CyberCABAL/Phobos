@@ -22,6 +22,7 @@
 #include <Ext/Tiberium/Body.h>
 #include <Ext/VoxelAnim/Body.h>
 #include <Ext/WarheadType/Body.h>
+#include <Ext/Wave/Body.h>
 
 #include <New/Type/BannerTypeClass.h>
 #include <New/Type/DigitalDisplayTypeClass.h>
@@ -330,7 +331,9 @@ using PhobosTypeRegistry = TypeRegistry <
 	AttachEffectClass,
 	NewSWType,
 	SelectBoxTypeClass,
-	InsigniaTypeClass
+	InsigniaTypeClass,
+	// appended later
+	WaveExt
 	// other classes
 > ;
 

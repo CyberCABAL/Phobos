@@ -167,6 +167,56 @@ void WeaponTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->AmbientDamage_Warhead.Read<true>(exINI, pSection, "AmbientDamage.Warhead");
 	this->AmbientDamage_IgnoreTarget.Read(exINI, pSection, "AmbientDamage.IgnoreTarget");
 
+	this->Wave_Shape.Read(exINI, pSection, "Wave.Shape");
+
+	if (this->Wave_Shape.size() > 4)
+	{
+		Debug::Log("[Developer warning] [%s] Wave.Shape has more than 4 values, the extra values are ignored.\n", pSection);
+		this->Wave_Shape.resize(4);
+	}
+
+	for (auto& value : this->Wave_Shape)
+	{
+		if (value < 0 || value > WeaponTypeExt::WaveShapeMaxValue)
+		{
+			Debug::Log("[Developer warning] [%s] Wave.Shape value %d is outside 0-%d and has been clamped.\n", pSection, value, WeaponTypeExt::WaveShapeMaxValue);
+			value = std::clamp(value, 0, WeaponTypeExt::WaveShapeMaxValue);
+		}
+	}
+
+	this->Wave_ExtraDraw.Read(exINI, pSection, "Wave.ExtraDraw");
+
+	if (this->Wave_ExtraDraw.size() > 2)
+	{
+		Debug::Log("[Developer warning] [%s] Wave.ExtraDraw has more than 2 values, the extra values are ignored.\n", pSection);
+		this->Wave_ExtraDraw.resize(2);
+	}
+
+	for (auto& value : this->Wave_ExtraDraw)
+	{
+		// Written this way round so that a value that is not a number is clamped too.
+		if (!(value >= 0.0 && value <= WeaponTypeExt::WaveExtraDrawMaxValue))
+		{
+			Debug::Log("[Developer warning] [%s] Wave.ExtraDraw value %g%% is outside 0%%-%g%% and has been clamped.\n",
+				pSection, value * 100.0, WeaponTypeExt::WaveExtraDrawMaxValue * 100.0);
+			value = value > WeaponTypeExt::WaveExtraDrawMaxValue ? WeaponTypeExt::WaveExtraDrawMaxValue : 0.0;
+		}
+	}
+
+	this->Wave_MinimumLength.Read(exINI, pSection, "Wave.MinimumLength");
+
+	if (this->Wave_MinimumLength.isset())
+	{
+		const int value = this->Wave_MinimumLength.Get();
+
+		if (value < WeaponTypeExt::WaveMinimumLengthMinValue || value > WeaponTypeExt::WaveMinimumLengthMaxValue)
+		{
+			Debug::Log("[Developer warning] [%s] Wave.MinimumLength value %d is outside %d-%d and has been clamped.\n",
+				pSection, value, WeaponTypeExt::WaveMinimumLengthMinValue, WeaponTypeExt::WaveMinimumLengthMaxValue);
+			this->Wave_MinimumLength = std::clamp(value, WeaponTypeExt::WaveMinimumLengthMinValue, WeaponTypeExt::WaveMinimumLengthMaxValue);
+		}
+	}
+
 	// AttachEffect
 	this->AttachEffects.LoadFromINI(pINI, pSection);
 	this->AttachEffect_Enable = (this->AttachEffects.AttachTypes.size() > 0 || this->AttachEffects.RemoveTypes.size() > 0 || this->AttachEffects.RemoveGroups.size() > 0);
@@ -290,6 +340,9 @@ void WeaponTypeExt::Serialize(T& Stm)
 		.Process(this->ExtraWarheads_FullDetonation)
 		.Process(this->AmbientDamage_Warhead)
 		.Process(this->AmbientDamage_IgnoreTarget)
+		.Process(this->Wave_Shape)
+		.Process(this->Wave_ExtraDraw)
+		.Process(this->Wave_MinimumLength)
 		.Process(this->AttachEffects)
 		.Process(this->AttachEffect_Enable)
 		.Process(this->AttachEffect_RequiredTypes)

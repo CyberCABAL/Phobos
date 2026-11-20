@@ -17,6 +17,19 @@ public:
 
 	static constexpr DWORD Canary = 0x22222222;
 
+	// Largest allowed Wave.Shape value, in leptons (10 cells). Far wider than any vanilla wave (sonic waves are 200 wide),
+	// while keeping the wave's corner and screen coordinates, and the rows the game fills per frame, well within safe ranges.
+	static constexpr int WaveShapeMaxValue = 2560;
+
+	// Largest allowed Wave.ExtraDraw value, as a fraction of the distance between the wave's ends (100%).
+	static constexpr double WaveExtraDrawMaxValue = 1.0;
+
+	// Allowed Wave.MinimumLength values, in leptons. The smallest keeps the beam well over the 68 leptons that the two
+	// default tips of a Wave.IsLaser wave need, so they never overlap, and well away from a zero-length beam, which the game
+	// cannot draw. The largest matches WaveShapeMaxValue (10 cells).
+	static constexpr int WaveMinimumLengthMinValue = 100;
+	static constexpr int WaveMinimumLengthMaxValue = 2560;
+
 public:
 	// typed owner accessor
 	WeaponTypeClass* OwnerObject() const
@@ -73,6 +86,9 @@ public:
 	ValueableVector<bool> ExtraWarheads_FullDetonation;
 	Nullable<WarheadTypeClass*> AmbientDamage_Warhead;
 	Nullable<bool> AmbientDamage_IgnoreTarget;
+	ValueableVector<int> Wave_Shape;
+	ValueableVector<double> Wave_ExtraDraw;
+	Nullable<int> Wave_MinimumLength;
 	AEAttachInfoTypeClass AttachEffects;
 	Valueable<bool> AttachEffect_Enable;
 	ValueableVector<AttachEffectTypeClass*> AttachEffect_RequiredTypes;
@@ -179,6 +195,9 @@ public:
 		, ExtraWarheads_FullDetonation {}
 		, AmbientDamage_Warhead {}
 		, AmbientDamage_IgnoreTarget {}
+		, Wave_Shape {}
+		, Wave_ExtraDraw {}
+		, Wave_MinimumLength {}
 		, AttachEffects {}
 		, AttachEffect_Enable { false }
 		, AttachEffect_RequiredTypes {}
