@@ -62,6 +62,26 @@ public:
 	CDTimerClass DelayedFireTimer;
 	AnimClass* CurrentDelayedFireAnim;
 
+	// One ChargeLaser beam drawn by this object, with what is needed to keep it on the object.
+	struct ChargeLaserBeam
+	{
+		LaserDrawClass* Laser { nullptr };
+		CoordStruct Source {};
+		CoordStruct Target {};
+		ChargeLaserRelativeTo SourceRelativeTo { ChargeLaserRelativeTo::Body };
+		ChargeLaserRelativeTo TargetRelativeTo { ChargeLaserRelativeTo::Body };
+		int WeaponIndex { -1 };
+		int BurstIndex { 0 };
+	};
+
+	// ChargeLaser beams. None of this is saved: the game does not save lasers either, and the beams are recreated
+	// from the charge state after loading.
+	std::vector<ChargeLaserBeam> ChargeLasers {};        // held at full brightness, by beam index (Laser null if not shown)
+	std::vector<ChargeLaserBeam> ChargeLasers_Fading {}; // let go and fading out, still kept on the object
+	WeaponTypeClass* ChargeLasers_Weapon { nullptr };    // weapon whose beams are held
+	HouseClass* ChargeLasers_Owner { nullptr };          // owner when they were made (house colour)
+	int ChargeLasers_Frame { -1 };                       // last frame they were updated
+
 	AirstrikeClass* AirstrikeTargetingMe;
 
 	bool IsSelected;
@@ -167,6 +187,8 @@ public:
 	void UpdateShield();
 	void ApplySpawnLimitRange();
 	void UpdateLaserTrails();
+	void UpdateChargeLasers();
+	WeaponTypeClass* GetChargingWeapon(int& weaponIndex, int& elapsed) const;
 	void UpdateAttachEffects();
 	void UpdateGattlingRateDownReset();
 	bool UpdateCumulativeAttachEffects(AttachEffectTypeClass* pAttachEffectType, bool createAnim = false);

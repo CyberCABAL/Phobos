@@ -3780,6 +3780,57 @@ Burst.NoDelay=false   ; boolean
 - This will ignore `Burst.Delays` setting.
 ```
 
+### Charge lasers
+
+- A weapon can now draw purely cosmetic lasers while it charges up before firing, for example beams that light up one after another and meet at the top of a tower. This works for:
+  - Buildings that charge up with `IsAnimDelayedFire=yes` and `DelayedFireDelay` (in `artmd.ini`). The weapon fires on frame `DelayedFireDelay` of the charge. The building's `SpecialAnim` is optional, so the beams can replace it.
+  - Prism towers that fire their own shot (not the ones supporting another tower).
+  - Any weapon with [`DelayedFire.Duration`](#delayed-firing). The weapon fires when that duration is over.
+- The beams take their look from another WeaponType with `IsLaser=yes`, set with `ChargeLaser.Weapon`. That weapon is never fired, so only its laser settings matter: `LaserInnerColor`, `LaserOuterColor`, `LaserOuterSpread`, `IsHouseColor`, `Laser.IsSingleColor`, `LaserThickness`, `LaserZAdjust` and `LaserDuration`.
+- Each beam is set with keys numbered from `ChargeLaser0` upwards. The numbering stops at the first number that has no keys. Keys without a number (`ChargeLaser.*`) are the default for every beam of the weapon, and a numbered key overrides the default for its beam only.
+  - `Source` and `Target` are the two ends of the beam, as offsets in leptons. They default to `0,0,0`.
+  - `Source.RelativeTo` and `Target.RelativeTo` set what each offset is measured from:
+    - `Body`: the firer's centre, turned with its body. Buildings never turn, so for them this is the same as `Fixed`.
+    - `Turret`: the turret's centre, turned with the turret. This is the same as `Body` if the firer has no turret.
+    - `Fixed`: the firer's centre, never turned.
+    - `Weapon`: the point the charging weapon fires from (its FLH, including burst FLHs and extra turrets), turned the same way. For a building without a turret the game turns weapon FLHs toward the target, so this point turns too.
+  - `Delay` is the frame of the charge on which the beam appears, counted from the start of the charge.
+  - `End` is the frame of the charge on which the beam starts to fade, counted from the start of the charge too, not from `Delay`. If it is not set, the beam stays until the weapon fires. A beam whose `End` is not after its `Delay` is never shown.
+  - Negative `Delay` and `End` values are set to `0`, and a warning is written to the debug log.
+- A beam that is shown stays at full brightness. When it ends (the weapon fires, the beam's `End` frame comes, or the charge is interrupted), it fades out over the laser weapon's `LaserDuration` frames, like a fired laser. A `LaserDuration` below `2` is treated as `2`.
+- Beams are not shown, and fade out if they were, while the firer cannot fire: when it has no target, is deactivated (for example by EMP, or a robot tank without power), is being erased by a temporal weapon, is cloaked, or is inside a transport. For buildings also while being sold, or while their power is off (for example `Powered=yes` without enough power).
+  - A building's charge countdown keeps running through these, except while it is being erased by a temporal weapon, which pauses it. If the firer can fire again before the charge is over (for example it gets a new target, or the temporal weapon stops), the beams that are due appear again.
+  - With `DelayedFire.Duration`, the beams follow that delay exactly. Its timer does not stop while the firer cannot fire, so the beams can fade out at the end of the delay without a shot, for example while the firer is still moving into range or is being erased by a temporal weapon. Deactivating a unit (for example by EMP) clears its target, which cancels the delay and the beams.
+- Beams are drawn directly and are not affected by the laser weapon's `LaserPositionUpdate`.
+- Beams follow the firer, both while they are shown and while they fade out, so they turn with turrets and move with units. Ends set relative to `Weapon` keep the FLH of the burst shot the beam charged for, even after the firer moves on to its next burst. If the firer dies or enters a transport, beams that are fading out stay where they are.
+- Beams are depth tested like any laser, so the parts of a beam that are behind a building are hidden by it. The game's depth for a building's image is an approximation, so where a beam crosses a building, how much of it is hidden may not match the art exactly.
+  - For a building, the `Source` end of each beam is treated like the point a laser fired by that building starts from: it is brought forward by how far it is above the building on screen, so the building's own image does not hide it. The `Target` end keeps its natural depth. So when beams meet at a point on the building's image, make that point the `Source` and their other ends the `Target`.
+  - The laser weapon's `LaserZAdjust` moves the `Source` end further (negative values bring it forward). Its effect fades out toward the `Target` end.
+- Beams are not saved in savegames. After loading, the beams of a charge that is still going appear again.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWEAPON]                         ; WeaponType, the weapon that charges up
+ChargeLaser.Weapon=                  ; WeaponType with IsLaser=yes
+ChargeLaser.Source=0,0,0             ; integer - Forward,Lateral,Height
+ChargeLaser.Source.RelativeTo=Body   ; Body / Turret / Fixed / Weapon
+ChargeLaser.Target=0,0,0             ; integer - Forward,Lateral,Height
+ChargeLaser.Target.RelativeTo=Body   ; Body / Turret / Fixed / Weapon
+ChargeLaser.Delay=0                  ; integer, game frames
+ChargeLaser.End=                     ; integer, game frames
+ChargeLaserN.Weapon=                 ; WeaponType with IsLaser=yes, default to ChargeLaser.Weapon
+ChargeLaserN.Source=                 ; integer - Forward,Lateral,Height, default to ChargeLaser.Source
+ChargeLaserN.Source.RelativeTo=      ; Body / Turret / Fixed / Weapon, default to ChargeLaser.Source.RelativeTo
+ChargeLaserN.Target=                 ; integer - Forward,Lateral,Height, default to ChargeLaser.Target
+ChargeLaserN.Target.RelativeTo=      ; Body / Turret / Fixed / Weapon, default to ChargeLaser.Target.RelativeTo
+ChargeLaserN.Delay=                  ; integer, game frames, default to ChargeLaser.Delay
+ChargeLaserN.End=                    ; integer, game frames, default to ChargeLaser.End
+```
+
+```{note}
+`N` in `ChargeLaserN.*` is the beam number, counting from 0. For example, `ChargeLaser0.Source=200,200,60`.
+```
+
 ### Customize whether weapon can target iron-curtained technos
 
 - In vanilla, computer players always don't attack iron-curtained technos. Now you can customize it.

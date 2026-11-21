@@ -193,6 +193,15 @@ enum class PositionFollow : BYTE
 
 MAKE_ENUM_FLAGS(PositionFollow)
 
+// What a ChargeLaser source or target offset (F,L,H) is measured from.
+enum class ChargeLaserRelativeTo : BYTE
+{
+	Body = 0,   // the object's centre, turned with its body (buildings never turn)
+	Turret = 1, // the turret's centre, turned with the turret; same as Body without a turret
+	Fixed = 2,  // the object's centre, never turned
+	Weapon = 3  // the charging weapon's firing point (FLH), turned the same way as it
+};
+
 enum class AutoDeathBehavior
 {
 	Kill = 0,     // default death option

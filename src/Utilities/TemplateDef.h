@@ -1049,6 +1049,33 @@ namespace detail
 	}
 
 	template <>
+	inline bool read<ChargeLaserRelativeTo>(ChargeLaserRelativeTo& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			static const std::pair<const char*, ChargeLaserRelativeTo> Names[] =
+			{
+				{"body", ChargeLaserRelativeTo::Body},
+				{"turret", ChargeLaserRelativeTo::Turret},
+				{"fixed", ChargeLaserRelativeTo::Fixed},
+				{"weapon", ChargeLaserRelativeTo::Weapon},
+			};
+
+			for (auto const& [name, val] : Names)
+			{
+				if (_strcmpi(parser.value(), name) == 0)
+				{
+					value = val;
+					return true;
+				}
+			}
+
+			Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a position (Body, Turret, Fixed, Weapon)");
+		}
+		return false;
+	}
+
+	template <>
 	inline bool read<SelfHealGainType>(SelfHealGainType& value, INI_EX& parser, const char* pSection, const char* pKey)
 	{
 		if (parser.ReadString(pSection, pKey))

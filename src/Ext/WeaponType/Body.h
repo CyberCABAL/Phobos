@@ -30,6 +30,29 @@ public:
 	static constexpr int WaveMinimumLengthMinValue = 100;
 	static constexpr int WaveMinimumLengthMaxValue = 2560;
 
+	// One set of ChargeLaser keys: either the weapon's defaults (ChargeLaser.*) or one beam's own values (ChargeLaser<N>.*).
+	// Every value is optional; a beam's unset values come from the defaults.
+	struct ChargeLaserEntry
+	{
+		Nullable<WeaponTypeClass*> Weapon;
+		Nullable<CoordStruct> Source;
+		Nullable<ChargeLaserRelativeTo> Source_RelativeTo;
+		Nullable<CoordStruct> Target;
+		Nullable<ChargeLaserRelativeTo> Target_RelativeTo;
+		Nullable<int> Delay;
+		Nullable<int> End;
+
+		void Read(INI_EX& exINI, const char* pSection, const char* pPrefix);
+		bool IsAnySet() const;
+
+		bool Load(PhobosStreamReader& stm, bool registerForChange);
+		bool Save(PhobosStreamWriter& stm) const;
+
+	private:
+		template <typename T>
+		bool Serialize(T& stm);
+	};
+
 public:
 	// typed owner accessor
 	WeaponTypeClass* OwnerObject() const
@@ -89,6 +112,8 @@ public:
 	ValueableVector<int> Wave_Shape;
 	ValueableVector<double> Wave_ExtraDraw;
 	Nullable<int> Wave_MinimumLength;
+	ChargeLaserEntry ChargeLaser;
+	std::vector<ChargeLaserEntry> ChargeLasers;
 	AEAttachInfoTypeClass AttachEffects;
 	Valueable<bool> AttachEffect_Enable;
 	ValueableVector<AttachEffectTypeClass*> AttachEffect_RequiredTypes;
@@ -198,6 +223,8 @@ public:
 		, Wave_Shape {}
 		, Wave_ExtraDraw {}
 		, Wave_MinimumLength {}
+		, ChargeLaser {}
+		, ChargeLasers {}
 		, AttachEffects {}
 		, AttachEffect_Enable { false }
 		, AttachEffect_RequiredTypes {}

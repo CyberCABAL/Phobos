@@ -2073,6 +2073,7 @@ PreserveCSFWhitespace=false      ; boolean
 - [Techno power overrides for AI budgeting](New-or-Enhanced-Logics.md#ai-power-budgeting) (by Noble_Fish)
 - [Control of AI base plan rebuilding](New-or-Enhanced-Logics.md#ai-base-plan-rebuilding) (by Noble_Fish)
 - [Laser wave shape customization for Ares' `Wave.IsLaser` and `Wave.IsBigLaser`](New-or-Enhanced-Logics.md#laser-wave-shape-customization) (by CyberCABAL)
+- [Cosmetic lasers while a weapon charges up](New-or-Enhanced-Logics.md#charge-lasers) (by CyberCABAL)
 
 #### Vanilla fixes:
 - Fixed the bug that buildings with passengers cannot unload via the Deploy hotkey or command bar button (by Noble_Fish)

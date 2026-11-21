@@ -76,6 +76,72 @@ int WeaponTypeExt::GetBurstDelay(int burstIndex) const
 // =============================
 // load / save
 
+void WeaponTypeExt::ChargeLaserEntry::Read(INI_EX& exINI, const char* pSection, const char* pPrefix)
+{
+	char key[0x40];
+
+	_snprintf_s(key, _TRUNCATE, "%s.Weapon", pPrefix);
+	this->Weapon.Read<true>(exINI, pSection, key);
+
+	_snprintf_s(key, _TRUNCATE, "%s.Source", pPrefix);
+	this->Source.Read(exINI, pSection, key);
+
+	_snprintf_s(key, _TRUNCATE, "%s.Source.RelativeTo", pPrefix);
+	this->Source_RelativeTo.Read(exINI, pSection, key);
+
+	_snprintf_s(key, _TRUNCATE, "%s.Target", pPrefix);
+	this->Target.Read(exINI, pSection, key);
+
+	_snprintf_s(key, _TRUNCATE, "%s.Target.RelativeTo", pPrefix);
+	this->Target_RelativeTo.Read(exINI, pSection, key);
+
+	// Delay and End are frames counted from the start of the charge, so they cannot be negative.
+	auto readFrame = [&](Nullable<int>& value, const char* pName)
+	{
+		_snprintf_s(key, _TRUNCATE, "%s.%s", pPrefix, pName);
+		value.Read(exINI, pSection, key);
+
+		if (value.isset() && value.Get() < 0)
+		{
+			Debug::Log("[Developer warning] [%s] %s value %d is negative and has been set to 0.\n", pSection, key, value.Get());
+			value = 0;
+		}
+	};
+
+	readFrame(this->Delay, "Delay");
+	readFrame(this->End, "End");
+}
+
+bool WeaponTypeExt::ChargeLaserEntry::IsAnySet() const
+{
+	return this->Weapon.isset() || this->Source.isset() || this->Source_RelativeTo.isset() || this->Target.isset()
+		|| this->Target_RelativeTo.isset() || this->Delay.isset() || this->End.isset();
+}
+
+bool WeaponTypeExt::ChargeLaserEntry::Load(PhobosStreamReader& stm, bool registerForChange)
+{
+	return this->Serialize(stm);
+}
+
+bool WeaponTypeExt::ChargeLaserEntry::Save(PhobosStreamWriter& stm) const
+{
+	return const_cast<WeaponTypeExt::ChargeLaserEntry*>(this)->Serialize(stm);
+}
+
+template <typename T>
+bool WeaponTypeExt::ChargeLaserEntry::Serialize(T& stm)
+{
+	return stm
+		.Process(this->Weapon)
+		.Process(this->Source)
+		.Process(this->Source_RelativeTo)
+		.Process(this->Target)
+		.Process(this->Target_RelativeTo)
+		.Process(this->Delay)
+		.Process(this->End)
+		.Success();
+}
+
 void WeaponTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 {
 	auto pThis = this->OwnerObject();
@@ -217,6 +283,29 @@ void WeaponTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 		}
 	}
 
+	// ChargeLaser: the defaults, then ChargeLaser0, ChargeLaser1, ... until an index has no keys at all.
+	// Beams already known (e.g. from rulesmd.ini when a map is read) are kept and only overridden key by key.
+	this->ChargeLaser.Read(exINI, pSection, "ChargeLaser");
+
+	for (size_t idx = 0; ; ++idx)
+	{
+		_snprintf_s(tempBuffer, _TRUNCATE, "ChargeLaser%u", idx);
+
+		if (idx < this->ChargeLasers.size())
+		{
+			this->ChargeLasers[idx].Read(exINI, pSection, tempBuffer);
+			continue;
+		}
+
+		ChargeLaserEntry beam;
+		beam.Read(exINI, pSection, tempBuffer);
+
+		if (!beam.IsAnySet())
+			break;
+
+		this->ChargeLasers.push_back(beam);
+	}
+
 	// AttachEffect
 	this->AttachEffects.LoadFromINI(pINI, pSection);
 	this->AttachEffect_Enable = (this->AttachEffects.AttachTypes.size() > 0 || this->AttachEffects.RemoveTypes.size() > 0 || this->AttachEffects.RemoveGroups.size() > 0);
@@ -343,6 +432,8 @@ void WeaponTypeExt::Serialize(T& Stm)
 		.Process(this->Wave_Shape)
 		.Process(this->Wave_ExtraDraw)
 		.Process(this->Wave_MinimumLength)
+		.Process(this->ChargeLaser)
+		.Process(this->ChargeLasers)
 		.Process(this->AttachEffects)
 		.Process(this->AttachEffect_Enable)
 		.Process(this->AttachEffect_RequiredTypes)
