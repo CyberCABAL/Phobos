@@ -447,8 +447,12 @@ DEFINE_HOOK(0x54D138, JumpjetLocomotionClass_Movement_AI_SpeedModifiers, 0x6)
 {
 	GET(JumpjetLocomotionClass*, pThis, ESI);
 
-	const double multiplier = FootExt::GetCurrentSpeedMultiplier(pThis->LinkedTo);
-	pThis->Speed = static_cast<int>(FootExt::Fetch(pThis->LinkedTo)->JumpjetSpeed * multiplier);
+	const auto pLinkedTo = pThis->LinkedTo;
+	const auto pExt = FootExt::Fetch(pLinkedTo);
+
+	// Locomotor warheads with JumpjetSpeed.IgnoreSpeedMultipliers=true pull at a fixed speed.
+	const double multiplier = pExt->JumpjetSpeedIgnoresMultipliers ? 1.0 : FootExt::GetCurrentSpeedMultiplier(pLinkedTo);
+	pThis->Speed = static_cast<int>(pExt->JumpjetSpeed * multiplier);
 
 	return 0;
 }

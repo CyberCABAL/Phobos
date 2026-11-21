@@ -3330,13 +3330,15 @@ DecloakDamagedTargets=      ; boolean, default to [General] -> DecloakDamagedTar
 
 ### Customizing locomotor warhead
 
-- Now you can customize jumpjet properties on warhead.
+- Now you can customize jumpjet properties on warhead. These apply to the target while it is held by a warhead with `IsLocomotor=true` and `Locomotor=Jumpjet`, such as the Magnetron's.
+- By default, the target's speed modifiers also affect how fast it is pulled. These include `Speed(Units/Infantry/Aircraft)Mult` on its `Country`, `VeteranSpeed`, speed crates, Ares' `AttachEffect.SpeedMultiplier` and attached effects with `SpeedMultiplier`. Set `JumpjetSpeed.IgnoreSpeedMultipliers=true` to pull every target at the same speed. This also lets the warhead pull targets whose speed multiplier is 0.
 
 In `rulesmd.ini`:
 ```ini
 [SOMEWARHEAD]                           ; WarheadType with IsLocomotor and Locomotor=Jumpjet
 JumpjetTurnRate=                        ; Integer, default to [TechnoType] -> JumpjetTurnRate
 JumpjetSpeed=                           ; Integer, default to [TechnoType] -> JumpjetSpeed
+JumpjetSpeed.IgnoreSpeedMultipliers=    ; boolean, default to false
 JumpjetClimb=                           ; floating point value, default to [TechnoType] -> JumpjetClimb
 JumpjetCrash=                           ; floating point value, default to [TechnoType] -> JumpjetCrash
 JumpjetHeight=                          ; Integer, default to [TechnoType] -> JumpjetHeight

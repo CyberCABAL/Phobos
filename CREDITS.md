@@ -1047,3 +1047,4 @@ This page lists all the individual contributions to the project by their author.
   - Attached effect `DisguiseWhenStill`, `StillDisguises` and `RemoveStillDisguises`
   - Disguised vehicle drawing fixes (TerrainType disguise frames and height, uncached voxel fade, SHP facing)
   - Removing `DisguiseWhenStill` disguises while a locomotor warhead holds the vehicle
+  - `JumpjetSpeed.IgnoreSpeedMultipliers` for locomotor warheads

@@ -354,6 +354,7 @@ void WarheadTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->JumpjetTurnRate.Read(exINI, pSection, "JumpjetTurnRate");
 	this->JumpjetSpeed.Read(exINI, pSection, "JumpjetSpeed");
+	this->JumpjetSpeed_IgnoreSpeedMultipliers.Read(exINI, pSection, "JumpjetSpeed.IgnoreSpeedMultipliers");
 	this->JumpjetClimb.Read(exINI, pSection, "JumpjetClimb");
 	this->JumpjetCrash.Read(exINI, pSection, "JumpjetCrash");
 	this->JumpjetHeight.Read(exINI, pSection, "JumpjetHeight");
@@ -777,6 +778,7 @@ void WarheadTypeExt::Serialize(T& Stm)
 
 		.Process(this->JumpjetTurnRate)
 		.Process(this->JumpjetSpeed)
+		.Process(this->JumpjetSpeed_IgnoreSpeedMultipliers)
 		.Process(this->JumpjetClimb)
 		.Process(this->JumpjetCrash)
 		.Process(this->JumpjetHeight)

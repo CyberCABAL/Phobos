@@ -12,6 +12,7 @@ public:
 	bool LastKillWasTeamTarget;
 	double LastWarpDistance;
 	int JumpjetSpeed;
+	bool JumpjetSpeedIgnoresMultipliers; // Set while a locomotor warhead with JumpjetSpeed.IgnoreSpeedMultipliers=true is pulling this unit.
 	bool IsInTunnel;
 	bool IsBurrowed;
 	bool UndergroundTracked;
@@ -35,6 +36,7 @@ public:
 		, LastKillWasTeamTarget { false }
 		, LastWarpDistance {}
 		, JumpjetSpeed { 14 } // 0x7115B8
+		, JumpjetSpeedIgnoresMultipliers { false }
 		, IsInTunnel { false }
 		, IsBurrowed { false }
 		, UndergroundTracked { false }

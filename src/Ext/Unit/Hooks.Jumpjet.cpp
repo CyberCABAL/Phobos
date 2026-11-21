@@ -197,6 +197,7 @@ DEFINE_HOOK(0x54DAC4, JumpjetLocomotionClass_EndPiggyback_Blyat, 0x6)
 	const auto pExt = FootExt::Fetch(pLinkedTo);
 
 	pExt->JumpjetSpeed = pType->JumpjetSpeed;
+	pExt->JumpjetSpeedIgnoresMultipliers = false;
 	pLinkedTo->PrimaryFacing.SetROT(pType->ROT);
 
 	if (pType->SensorsSight)
@@ -489,6 +490,7 @@ DEFINE_HOOK(0x54AD41, JumpjetLocomotionClass_Link_To_Object_LocomotorWarhead, 0x
 		const auto pWHExt = WarheadTypeExt::Fetch(pLocomotorWarhead);
 		pLoco->TurnRate = pWHExt->JumpjetTurnRate.Get(pType->JumpjetTurnRate);
 		pLoco->Speed = pLinkedToExt->JumpjetSpeed = pWHExt->JumpjetSpeed.Get(pType->JumpjetSpeed);
+		pLinkedToExt->JumpjetSpeedIgnoresMultipliers = pWHExt->JumpjetSpeed_IgnoreSpeedMultipliers;
 		pLoco->Climb = pWHExt->JumpjetClimb.Get(pType->JumpjetClimb);
 		pLoco->Crash = pWHExt->JumpjetCrash.Get(pType->JumpjetCrash);
 		pLoco->Height = std::max(pWHExt->JumpjetHeight.Get(pType->JumpjetHeight), Unsorted::CellHeight);
@@ -501,6 +503,7 @@ DEFINE_HOOK(0x54AD41, JumpjetLocomotionClass_Link_To_Object_LocomotorWarhead, 0x
 	{
 		pLoco->TurnRate = pType->JumpjetTurnRate;
 		pLoco->Speed = pLinkedToExt->JumpjetSpeed = pType->JumpjetSpeed;
+		pLinkedToExt->JumpjetSpeedIgnoresMultipliers = false;
 		pLoco->Climb = pType->JumpjetClimb;
 		pLoco->Crash = pType->JumpjetCrash;
 		pLoco->Height = std::max(pType->JumpjetHeight, Unsorted::CellHeight);

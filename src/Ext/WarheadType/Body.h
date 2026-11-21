@@ -172,6 +172,7 @@ public:
 
 	Nullable<int> JumpjetTurnRate;
 	Nullable<int> JumpjetSpeed;
+	Valueable<bool> JumpjetSpeed_IgnoreSpeedMultipliers;
 	Nullable<float> JumpjetClimb;
 	Nullable<float> JumpjetCrash;
 	Nullable<int> JumpjetHeight;
@@ -459,6 +460,7 @@ public:
 
 		, JumpjetTurnRate {}
 		, JumpjetSpeed {}
+		, JumpjetSpeed_IgnoreSpeedMultipliers { false }
 		, JumpjetClimb {}
 		, JumpjetCrash {}
 		, JumpjetHeight {}
