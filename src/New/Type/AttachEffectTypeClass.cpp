@@ -177,6 +177,9 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 
 	this->Cloakable.Read(exINI, pSection, "Cloakable");
 	this->ForceDecloak.Read(exINI, pSection, "ForceDecloak");
+	this->DisguiseWhenStill.Read(exINI, pSection, "DisguiseWhenStill");
+	this->StillDisguises.Read(exINI, pSection, "StillDisguises");
+	this->RemoveStillDisguises.Read(exINI, pSection, "RemoveStillDisguises");
 
 	this->WeaponRange_Multiplier.Read(exINI, pSection, "WeaponRange.Multiplier");
 	this->WeaponRange_ExtraRange.Read(exINI, pSection, "WeaponRange.ExtraRange");
@@ -241,6 +244,7 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	if (this->FirepowerMultiplier != 1.0 || this->ArmorMultiplier != 1.0 || this->SpeedMultiplier != 1.0 || this->ROFMultiplier != 1.0
 		|| this->WeaponRange_Multiplier != 1.0 || this->WeaponRange_ExtraRange != 0.0 || this->Crit_Multiplier != 1.0 || this->Crit_ExtraChance != 0.0
 		|| this->DisableWeapons || this->Unkillable || this->ReflectDamage || this->Cloakable || this->ForceDecloak || this->Tint->Enabled
+		|| this->DisguiseWhenStill || this->RemoveStillDisguises
 		|| (this->DiscardOn & DiscardCondition::Firing) != DiscardCondition::None
 		|| (this->DiscardOn & DiscardCondition::ReceivedDamage) != DiscardCondition::None
 		|| (this->DiscardOn & DiscardCondition::OwnerChange) != DiscardCondition::None)
@@ -340,6 +344,9 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->ROFMultiplier_ApplyOnCurrentTimer)
 		.Process(this->Cloakable)
 		.Process(this->ForceDecloak)
+		.Process(this->DisguiseWhenStill)
+		.Process(this->StillDisguises)
+		.Process(this->RemoveStillDisguises)
 		.Process(this->WeaponRange_Multiplier)
 		.Process(this->WeaponRange_ExtraRange)
 		.Process(this->WeaponRange_AllowWeapons)

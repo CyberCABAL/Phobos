@@ -126,6 +126,8 @@ public:
 		Valueable<bool> AlternateFLH_ApplyVehicle;
 		Valueable<bool> DestroyAnim_Random;
 		Valueable<bool> UseDisguiseMovementSpeed;
+		Valueable<bool> StillDisguise_RemoveIfAttackedByLocomotor;
+		Valueable<bool> StillDisguise_DrawFix;
 		Valueable<bool> Convert_ResetMindControl;
 		Valueable<bool> BuildLimitGroup_ContentIfAnyMatch;
 		Valueable<bool> BuildLimitGroup_NotBuildableIfQueueMatch;
@@ -680,6 +682,8 @@ public:
 			, AlternateFLH_ApplyVehicle { false }
 			, DestroyAnim_Random { true }
 			, UseDisguiseMovementSpeed { false }
+			, StillDisguise_RemoveIfAttackedByLocomotor { true }
+			, StillDisguise_DrawFix { true }
 			, Convert_ResetMindControl { false }
 			, BuildLimitGroup_ContentIfAnyMatch { false }
 			, BuildLimitGroup_NotBuildableIfQueueMatch { false }

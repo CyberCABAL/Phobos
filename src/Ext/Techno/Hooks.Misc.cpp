@@ -610,12 +610,120 @@ DEFINE_HOOK(0x522790, InfantryClass_ClearDisguise_DefaultDisguise, 0x6)
 	return 0;
 }
 
+// Whether the game runs its disguise logic for the vehicle. Vanilla only does it for CanDisguise=true types.
+static bool UsesDisguiseLogic(UnitClass* pThis)
+{
+	return pThis->Type->CanDisguise || TechnoExt::Fetch(pThis)->AE.DisguiseWhenStill;
+}
+
+// True while a locomotor warhead (e.g. Magnetron) holds the vehicle, or has let it go and the vehicle has not landed yet.
+// The warhead's locomotor piggybacks on the vehicle's own until then. IsLetGoByLocomotor can't be used: every jumpjet landing sets it.
+static bool IsLocomotorWarheadInCharge(UnitClass* pThis)
+{
+	if (pThis->IsAttackedByLocomotor)
+		return true;
+
+	IPiggybackPtr pPiggyback = pThis->Locomotor;
+	return pPiggyback && pPiggyback->Is_Piggybacking();
+}
+
+// Whether a vehicle may take on a still disguise (DisguiseWhenStill, from its type or an attached effect).
+static bool CanStillDisguise(UnitClass* pThis)
+{
+	auto const pType = pThis->Type;
+	auto const& aeProperties = TechnoExt::Fetch(pThis)->AE;
+
+	// Like vanilla, the type's own DisguiseWhenStill needs CanDisguise=true.
+	if (!aeProperties.DisguiseWhenStill && !(pType->CanDisguise && pType->DisguiseWhenStill))
+		return false;
+
+	if (aeProperties.RemoveStillDisguises)
+		return false;
+
+	return !RulesExt::Global()->StillDisguise_RemoveIfAttackedByLocomotor || !IsLocomotorWarheadInCharge(pThis);
+}
+
+DEFINE_HOOK(0x736486, UnitClass_AI_StillDisguise, 0x6)
+{
+	enum { UpdateDisguise = 0x73649A, SkipUpdateDisguise = 0x7364A1 };
+
+	GET(UnitClass*, pThis, ESI);
+	GET(UnitTypeClass*, pType, EAX);
+
+	if (pType->PermaDisguise)
+		return SkipUpdateDisguise;
+
+	bool update = UsesDisguiseLogic(pThis);
+
+	// Still disguises are always TerrainTypes. Drop one as soon as the vehicle can no longer have it,
+	// e.g. when the attached effect that granted it ends or while RemoveStillDisguises is active.
+	if (pThis->IsDisguised() && pThis->Disguise && pThis->Disguise->WhatAmI() == AbstractType::TerrainType
+		&& !CanStillDisguise(pThis))
+	{
+		pThis->ClearDisguise();
+		update = true; // Vanilla code then refreshes the mind control ring visibility.
+	}
+
+	return update ? UpdateDisguise : SkipUpdateDisguise;
+}
+
+DEFINE_HOOK(0x746901, UnitClass_UpdateDisguise_StillDisguise, 0x6)
+{
+	enum { Continue = 0x746907 };
+
+	GET(UnitClass*, pThis, ESI);
+
+	R->AL(CanStillDisguise(pThis));
+	return Continue;
+}
+
+// Starts the disguise blink timer after firing.
+DEFINE_HOOK(0x741444, UnitClass_Fire_StillDisguise, 0x6)
+{
+	enum { Continue = 0x74144A };
+
+	GET(UnitClass*, pThis, ESI);
+
+	R->AL(CanStillDisguise(pThis));
+	return Continue;
+}
+
+// Taking damage removes the disguise and delays the next one.
+DEFINE_HOOK(0x701FDC, TechnoClass_ReceiveDamage_StillDisguise, 0x6)
+{
+	enum { CheckPermaDisguise = 0x701FE6, SkipDisguise = 0x70202E };
+
+	GET(TechnoClass*, pThis, ESI);
+	GET(TechnoTypeClass*, pType, EAX);
+
+	auto const pUnit = specific_cast<UnitClass*>(pThis);
+	const bool usesDisguiseLogic = pUnit ? UsesDisguiseLogic(pUnit) : pType->CanDisguise;
+
+	return usesDisguiseLogic ? CheckPermaDisguise : SkipDisguise;
+}
+
 DEFINE_HOOK(0x746A30, UnitClass_UpdateDisguise_DefaultMirageDisguises, 0x5)
 {
 	enum { Apply = 0x746A6C };
 
 	GET(UnitClass*, pThis, ESI);
-	const auto& disguises = UnitTypeExt::Fetch(pThis->Type)->DefaultMirageDisguises.GetElements(RulesClass::Instance->DefaultMirageDisguises);
+	auto disguises = UnitTypeExt::Fetch(pThis->Type)->DefaultMirageDisguises.GetElements(RulesClass::Instance->DefaultMirageDisguises);
+
+	// The most recently attached active effect with StillDisguises set overrides the default list.
+	auto const& attachedEffects = TechnoExt::Fetch(pThis)->AttachedEffects;
+
+	for (auto it = attachedEffects.rbegin(); it != attachedEffects.rend(); ++it)
+	{
+		auto const& pAE = *it;
+		auto const& stillDisguises = pAE->GetType()->StillDisguises;
+
+		if (!stillDisguises.empty() && pAE->IsActive())
+		{
+			disguises = stillDisguises.GetElements();
+			break;
+		}
+	}
+
 	TerrainTypeClass* pDisguiseAs = nullptr;
 
 	if (const int size = static_cast<int>(disguises.size()))

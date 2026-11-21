@@ -70,6 +70,9 @@ This page describes all the engine features that are either new and introduced b
     - If `ROFMultiplier.ApplyOnCurrentTimer` is set to true, `ROFMultiplier` is applied on currently running reload timer (if any) when the effect is first applied.
   - If `Cloakable` is set to true, the object the effect is attached to is granted ability to cloak itself for duration of the effect.
   - `ForceDecloak`, if set to true, will uncloak and make the object the effect is attached to unable to cloak itself for duration of the effect.
+  - If `DisguiseWhenStill` is set to true, the vehicle the effect is attached to disguises itself while standing still. This works like the vehicle type tag of the same name (Mirage Tank), but the type does not need `CanDisguise=true`. The disguise is also dropped when the effect ends, and while a locomotor warhead holds the vehicle (see `StillDisguise.RemoveIfAttackedByLocomotor` in [Bugfixes and miscellaneous](Fixed-or-Improved-Logics.md#bugfixes-and-miscellaneous)). This only works on vehicles, and types with `PermaDisguise=true` are not affected.
+    - `StillDisguises` can be used to list the TerrainTypes the vehicle disguises as while the effect is active. It applies to any still disguise, including one from the type's own `DisguiseWhenStill=true`. If several active effects set it, the most recently attached one is used. If not set, the vehicle's `DefaultMirageDisguises` is used.
+  - `RemoveStillDisguises`, if set to true, removes the still disguise of the vehicle the effect is attached to and prevents it for duration of the effect, whether `DisguiseWhenStill` comes from its type or another effect. Other disguises, such as `PermaDisguise`, are not affected.
   - `WeaponRange.Multiplier` and `WeaponRange.ExtraRange` can be used to multiply the weapon firing range of the object the effect is attached to, or give it an increase / decrease (measured in cells), respectively. `ExtraRange` is cumulatively applied from all attached effects after all `Multiplier` values have been applied.
     - `WeaponRange.AllowWeapons` can be used to list only weapons that can benefit from this range bonus and `WeaponRange.DisallowWeapons` weapons that are not allowed to, respectively.
     - On TechnoTypes with `OpenTopped=true`, `OpenTopped.UseTransportRangeModifiers` can be set to true to make passengers firing out use the transport's active range bonuses instead. `[General] -> OpenTopped.UseTransportRangeModifiers` defines its global default value.
@@ -197,6 +200,9 @@ ROFMultiplier=1.0                                  ; floating point value
 ROFMultiplier.ApplyOnCurrentTimer=true             ; boolean
 Cloakable=false                                    ; boolean
 ForceDecloak=false                                 ; boolean
+DisguiseWhenStill=false                            ; boolean
+StillDisguises=                                    ; List of TerrainTypes
+RemoveStillDisguises=false                         ; boolean
 WeaponRange.Multiplier=1.0                         ; floating point value
 WeaponRange.ExtraRange=0.0                         ; floating point value
 WeaponRange.AllowWeapons=                          ; List of WeaponTypes

@@ -2074,6 +2074,7 @@ PreserveCSFWhitespace=false      ; boolean
 - [Control of AI base plan rebuilding](New-or-Enhanced-Logics.md#ai-base-plan-rebuilding) (by Noble_Fish)
 - [Laser wave shape customization for Ares' `Wave.IsLaser` and `Wave.IsBigLaser`](New-or-Enhanced-Logics.md#laser-wave-shape-customization) (by CyberCABAL)
 - [Cosmetic lasers while a weapon charges up](New-or-Enhanced-Logics.md#charge-lasers) (by CyberCABAL)
+- [Attached effects can grant or remove the Mirage Tank style `DisguiseWhenStill` disguise, and choose its TerrainTypes](New-or-Enhanced-Logics.md#attached-effects) (by CyberCABAL)
 
 #### Vanilla fixes:
 - Fixed the bug that buildings with passengers cannot unload via the Deploy hotkey or command bar button (by Noble_Fish)
@@ -2096,6 +2097,8 @@ PreserveCSFWhitespace=false      ; boolean
 - Allowed repair and sell mode to be always toggleable instead of relying on the presence of `Insignificant=no` buildings (by Ollerus)
 - Fixed the issue where the AI-triggered reachability check incorrectly rejects reachable transport teams that are summarized as having `MovementZone` of `Amphibious`, `AmphibiousCrusher`, `AmphibiousDestroyer`, or `Fly` (by Noble_Fish)
 - Fixed the issue where AI triggers also perform reachability checks on teams that only execute guard, wait, or auxiliary script actions (by Noble_Fish)
+- Fixed TerrainType disguises (e.g. the Mirage Tank's tree) using wrong frames and floating above hovering vehicles, uncached voxel vehicles changing colour while fading into their disguise, and disguised SHP vehicles always facing north for their owner (by CyberCABAL)
+- Vehicles now lose their `DisguiseWhenStill` disguise while held by a locomotor warhead, until they land (by CyberCABAL)
 
 #### Phobos fixes:
 - Fixed a game crash when parsing string list with null entry (by Ollerus)

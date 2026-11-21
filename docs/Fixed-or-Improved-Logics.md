@@ -347,6 +347,11 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed the issue where the AI-triggered reachability check incorrectly rejects reachable transport teams that are summarized as having `MovementZone` of `Amphibious`, `AmphibiousCrusher`, `AmphibiousDestroyer`, or `Fly`.
 - Fixed the issue where AI triggers also perform reachability checks on teams that only execute guard, wait, or auxiliary script actions.
 - Fixed the bug where slaves responded to cheer events while enslaved.
+- Fixed TerrainType disguises (e.g. the Mirage Tank's tree) taking their frame from the vehicle's own firing, idle or walking animation, which made the tree cycle through its normal and shadow frames, and floating at the vehicle's height on hovering vehicles. The tree now always uses its first frame and stands on the ground (or bridge).
+  - Also fixed voxel vehicles drawn without the voxel cache (e.g. `DisableVoxelCache=yes`) changing colour while their owner sees them fade into or out of their disguise, and disguised SHP vehicles always facing north for their owner.
+  - These fixes can be disabled by setting `[AudioVisual] -> StillDisguise.DrawFix=no` in `rulesmd.ini`.
+- Vehicles now lose their still disguise (`DisguiseWhenStill=true`, e.g. the Mirage Tank's tree) when grabbed by a locomotor warhead (`IsLocomotor=true`, e.g. the Magnetron's), and cannot disguise again until they have landed. Previously they kept the disguise while lifted, and could even take one in mid-air.
+  - This can be disabled by setting `[General] -> StillDisguise.RemoveIfAttackedByLocomotor=no` in `rulesmd.ini`.
 
 ## Fixes / interactions with other extensions
 

@@ -8,6 +8,8 @@
 #include <Utilities/TemplateDef.h>
 #include "LaserTrailTypeClass.h"
 
+#include <TerrainTypeClass.h>
+
 // AE discard condition
 enum class DiscardCondition : unsigned int
 {
@@ -114,6 +116,9 @@ public:
 	Valueable<bool> ROFMultiplier_ApplyOnCurrentTimer;
 	Valueable<bool> Cloakable;
 	Valueable<bool> ForceDecloak;
+	Valueable<bool> DisguiseWhenStill;
+	ValueableVector<TerrainTypeClass*> StillDisguises;
+	Valueable<bool> RemoveStillDisguises;
 	Valueable<double> WeaponRange_Multiplier;
 	Valueable<double> WeaponRange_ExtraRange;
 	ValueableVector<WeaponTypeClass*> WeaponRange_AllowWeapons;
@@ -204,6 +209,9 @@ public:
 		, ROFMultiplier_ApplyOnCurrentTimer { true }
 		, Cloakable { false }
 		, ForceDecloak { false }
+		, DisguiseWhenStill { false }
+		, StillDisguises {}
+		, RemoveStillDisguises { false }
 		, WeaponRange_Multiplier { 1.0 }
 		, WeaponRange_ExtraRange { 0.0 }
 		, WeaponRange_AllowWeapons {}

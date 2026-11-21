@@ -1197,6 +1197,8 @@ bool TechnoExt::RecalculateStatMultipliers(AttachEffectClass* pAttachEffect)
 		pAE.ROFMultiplier *= type->ROFMultiplier;
 		pAE.Cloakable |= type->Cloakable;
 		pAE.ForceDecloak |= type->ForceDecloak;
+		pAE.DisguiseWhenStill |= type->DisguiseWhenStill;
+		pAE.RemoveStillDisguises |= type->RemoveStillDisguises;
 		pAE.DisableWeapons |= type->DisableWeapons;
 		pAE.Unkillable |= type->Unkillable;
 		pAE.HasRangeModifier |= (type->WeaponRange_ExtraRange != 0.0 || type->WeaponRange_Multiplier != 0.0);
@@ -1221,6 +1223,8 @@ bool TechnoExt::RecalculateStatMultipliers(AttachEffectClass* pAttachEffect)
 	double ROF = 1.0;
 	bool cloak = false;
 	bool forceDecloak = false;
+	bool disguiseWhenStill = false;
+	bool removeStillDisguises = false;
 	bool disableWeapons = false;
 	bool unkillable = false;
 	bool hasRangeModifier = false;
@@ -1249,6 +1253,8 @@ bool TechnoExt::RecalculateStatMultipliers(AttachEffectClass* pAttachEffect)
 		ROF *= type->ROFMultiplier;
 		cloak |= type->Cloakable;
 		forceDecloak |= type->ForceDecloak;
+		disguiseWhenStill |= type->DisguiseWhenStill;
+		removeStillDisguises |= type->RemoveStillDisguises;
 		disableWeapons |= type->DisableWeapons;
 		unkillable |= type->Unkillable;
 		hasRangeModifier |= (type->WeaponRange_ExtraRange != 0.0 || type->WeaponRange_Multiplier != 0.0);
@@ -1266,6 +1272,8 @@ bool TechnoExt::RecalculateStatMultipliers(AttachEffectClass* pAttachEffect)
 	pAE.ROFMultiplier = ROF;
 	pAE.Cloakable = cloak;
 	pAE.ForceDecloak = forceDecloak;
+	pAE.DisguiseWhenStill = disguiseWhenStill;
+	pAE.RemoveStillDisguises = removeStillDisguises;
 	pAE.DisableWeapons = disableWeapons;
 	pAE.Unkillable = unkillable;
 	pAE.HasRangeModifier = hasRangeModifier;

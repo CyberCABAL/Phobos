@@ -163,6 +163,8 @@ struct AttachEffectTechnoProperties
 	double ROFMultiplier;
 	bool Cloakable;
 	bool ForceDecloak;
+	bool DisguiseWhenStill;
+	bool RemoveStillDisguises;
 	bool DisableWeapons;
 	bool Unkillable;
 	bool HasRangeModifier;
@@ -181,6 +183,8 @@ struct AttachEffectTechnoProperties
 		, ROFMultiplier { 1.0 }
 		, Cloakable { false }
 		, ForceDecloak { false }
+		, DisguiseWhenStill { false }
+		, RemoveStillDisguises { false }
 		, DisableWeapons { false }
 		, Unkillable { false }
 		, HasRangeModifier { false }

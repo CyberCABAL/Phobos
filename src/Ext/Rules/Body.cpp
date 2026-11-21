@@ -221,6 +221,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AlternateFLH_ApplyVehicle.Read(exINI, GameStrings::General, "AlternateFLH.ApplyVehicle");
 	this->DestroyAnim_Random.Read(exINI, GameStrings::General, "DestroyAnim.Random");
 	this->UseDisguiseMovementSpeed.Read(exINI, GameStrings::General, "UseDisguiseMovementSpeed");
+	this->StillDisguise_RemoveIfAttackedByLocomotor.Read(exINI, GameStrings::General, "StillDisguise.RemoveIfAttackedByLocomotor");
+	this->StillDisguise_DrawFix.Read(exINI, GameStrings::AudioVisual, "StillDisguise.DrawFix");
 	this->Convert_ResetMindControl.Read(exINI, GameStrings::General, "Convert.ResetMindControl");
 	this->BuildLimitGroup_ContentIfAnyMatch.Read(exINI, GameStrings::General, "BuildLimitGroup.ContentIfAnyMatch");
 	this->BuildLimitGroup_NotBuildableIfQueueMatch.Read(exINI, GameStrings::General, "BuildLimitGroup.NotBuildableIfQueueMatch");
@@ -852,6 +854,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AlternateFLH_ApplyVehicle)
 		.Process(this->DestroyAnim_Random)
 		.Process(this->UseDisguiseMovementSpeed)
+		.Process(this->StillDisguise_RemoveIfAttackedByLocomotor)
+		.Process(this->StillDisguise_DrawFix)
 		.Process(this->Convert_ResetMindControl)
 		.Process(this->BuildLimitGroup_ContentIfAnyMatch)
 		.Process(this->BuildLimitGroup_NotBuildableIfQueueMatch)
