@@ -1,7 +1,12 @@
 #include "Body.h"
 
 #include <EventClass.h>
+#include <FileSystem.h>
+#include <ScenarioClass.h>
+#include <Theater.h>
 #include <TunnelLocomotionClass.h>
+
+#include <cctype>
 
 #include <Ext/House/Body.h>
 #include <Ext/SWType/Body.h>
@@ -42,6 +47,110 @@ static bool InitStaticBuildingTypeContainers()
 bool BuildingTypeExt::ContainersInit = InitStaticBuildingTypeContainers();
 BuildingTypeExt::ExtContainer::ExtContainer() : Container("BuildingTypeClass") { }
 BuildingTypeExt::ExtContainer::~ExtContainer() = default;
+
+int BuildingTypeExt::GetArtFacingIndex(DirType facing) const
+{
+	const int count = static_cast<int>(this->Art_Facings.size());
+
+	if (!count)
+		return -1;
+
+	// Entry 0 is facing 0 (north, top-right on screen), then clockwise.
+	// Each entry covers the facings closest to it.
+	return ((static_cast<int>(facing) * count + 128) / 256) % count;
+}
+
+// Loads an image the way BuildingTypeClass::Load2DArt (0x45F230) loads a building's own image.
+static SHPStruct* LoadArtFacingImage(BuildingTypeClass* pType, const char* pArtSection, TheaterType theater)
+{
+	auto& artINI = CCINIClass::INI_Art;
+
+	char imageName[0x40];
+	artINI.ReadString(pArtSection, "Image", "", imageName, sizeof(imageName));
+	const char* pName = *imageName ? imageName : pArtSection;
+
+	const bool useTheaterExtension = artINI.ReadBool(pArtSection, "Theater", pType->Theater);
+	const char* pExtension = useTheaterExtension && theater != TheaterType::None
+		? Theater::GetTheater(theater).Extension
+		: ".SHP";
+
+	char fileName[MAX_PATH];
+	_makepath_s(fileName, nullptr, nullptr, pName, pExtension);
+
+	// The game swaps the second letter for the theater letter, but only in names like GAxxx, NTxxx, CAxxx or YTxxx (0x5F96B0).
+	if (theater != TheaterType::None && fileName[0] && fileName[1])
+	{
+		const char first = static_cast<char>(std::tolower(static_cast<unsigned char>(fileName[0])));
+		const char second = static_cast<char>(std::tolower(static_cast<unsigned char>(fileName[1])));
+
+		if ((first == 'g' || first == 'n' || first == 'c' || first == 'y') && (second == 'a' || second == 't'))
+			fileName[1] = Theater::GetTheater(theater).Letter[0];
+	}
+
+	auto pImage = FileSystem::LoadSHPFile(fileName);
+
+	// If that file does not exist, the game retries with G as the second letter (0x45FA1E). It does this for
+	// every name, not only the theater-style ones above, so ABC.SHP is retried as AGC.SHP. Kept the same
+	// so a variant image loads exactly like the BuildingType's own image.
+	if (!pImage && fileName[0] && fileName[1])
+	{
+		fileName[1] = 'G';
+		pImage = FileSystem::LoadSHPFile(fileName);
+	}
+
+	if (!pImage)
+		Debug::Log("[Developer warning][%s] Art.Facings: could not load the image of art section [%s].\n", pType->ID, pArtSection);
+
+	return pImage;
+}
+
+SHPStruct* BuildingTypeExt::GetArtFacingImage(int index)
+{
+	if (index < 0 || index >= static_cast<int>(this->Art_Facings.size()) || !ScenarioClass::Instance)
+		return nullptr;
+
+	const auto theater = ScenarioClass::Instance->Theater;
+
+	if (this->Art_Facings_ImagesTheater != theater)
+	{
+		auto const pThis = this->OwnerObject();
+		this->Art_Facings_Images.clear();
+
+		for (auto const& section : this->Art_Facings)
+			this->Art_Facings_Images.push_back(LoadArtFacingImage(pThis, section.c_str(), theater));
+
+		this->Art_Facings_ImagesTheater = theater;
+	}
+
+	return this->Art_Facings_Images[index];
+}
+
+const Point2D* BuildingTypeExt::GetOccupierMuzzleFlash(int artFacingIndex, int occupantIndex) const
+{
+	if (artFacingIndex >= 0 && artFacingIndex < static_cast<int>(this->Art_Facings_MuzzleFlashes.size()))
+	{
+		auto const& muzzleFlashes = this->Art_Facings_MuzzleFlashes[artFacingIndex];
+
+		if (occupantIndex >= 0 && occupantIndex < static_cast<int>(muzzleFlashes.size()))
+			return &muzzleFlashes[occupantIndex];
+	}
+
+	auto const pThis = this->OwnerObject();
+
+	return pThis->MaxNumberOccupants > 10
+		? &this->OccupierMuzzleFlashes[occupantIndex]
+		: &pThis->MuzzleFlash[occupantIndex];
+}
+
+const Point2D* BuildingTypeExt::GetArtFacingDamageFireOffsets(int artFacingIndex) const
+{
+	if (artFacingIndex < 0 || artFacingIndex >= static_cast<int>(this->Art_Facings_DamageFireOffsets.size()))
+		return nullptr;
+
+	auto const& offsets = this->Art_Facings_DamageFireOffsets[artFacingIndex];
+
+	return offsets.empty() ? nullptr : offsets.data();
+}
 
 // Assuming SuperWeapon & SuperWeapon2 are used (for the moment)
 int BuildingTypeExt::GetSuperWeaponCount() const
@@ -723,6 +832,9 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->AutoUpgrade.Read(exINI, pSection, "AutoUpgrade");
 	this->AI_BasePlan_Rebuild.Read(exINI, pSection, "AI.BasePlan.Rebuild");
 
+	if (exINI.ParseStringList(this->Art_Facings, pSection, "Art.Facings"))
+		this->Art_Facings_ImagesTheater.reset();
+
 	// Ares tag
 	this->SpyEffect_Custom.Read(exINI, pSection, "SpyEffect.Custom");
 	if (SuperWeaponTypeClass::Array.Count > 0)
@@ -745,6 +857,56 @@ void BuildingTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 			nMuzzleLocation.Read(exArtINI, pArtSection, tempBuffer);
 			this->OccupierMuzzleFlashes[i] = nMuzzleLocation.Get(Point2D::Empty);
 		}
+	}
+
+	// Art.Facings: garrison fire ports and damage fire offsets of each listed art section.
+	// A section that sets none of a list uses the BuildingType's own list.
+	this->Art_Facings_MuzzleFlashes.assign(this->Art_Facings.size(), {});
+	this->Art_Facings_DamageFireOffsets.assign(this->Art_Facings.size(), {});
+
+	for (size_t idx = 0; idx < this->Art_Facings.size(); ++idx)
+	{
+		const char* pFacingSection = this->Art_Facings[idx].c_str();
+
+		// like the game, unset fire ports are 0,0
+		std::vector<Point2D> muzzleFlashes(std::max(pThis->MaxNumberOccupants, 0), Point2D::Empty);
+		bool anyMuzzleFlash = false;
+
+		for (size_t i = 0; i < muzzleFlashes.size(); ++i)
+		{
+			Nullable<Point2D> nMuzzleLocation;
+			_snprintf_s(tempBuffer, sizeof(tempBuffer), "MuzzleFlash%d", static_cast<int>(i));
+			nMuzzleLocation.Read(exArtINI, pFacingSection, tempBuffer);
+
+			if (nMuzzleLocation.isset())
+			{
+				muzzleFlashes[i] = nMuzzleLocation.Get();
+				anyMuzzleFlash = true;
+			}
+		}
+
+		if (anyMuzzleFlash)
+			this->Art_Facings_MuzzleFlashes[idx] = std::move(muzzleFlashes);
+
+		// like the game (0x46039D), the list ends at the first unset offset, and the rest stay 0,0
+		std::vector<Point2D> damageFireOffsets(std::size(pThis->DamageFireOffset), Point2D::Empty);
+		bool anyDamageFireOffset = false;
+
+		for (size_t i = 0; i < damageFireOffsets.size(); ++i)
+		{
+			Nullable<Point2D> nOffset;
+			_snprintf_s(tempBuffer, sizeof(tempBuffer), "DamageFireOffset%d", static_cast<int>(i));
+			nOffset.Read(exArtINI, pFacingSection, tempBuffer);
+
+			if (!nOffset.isset())
+				break;
+
+			damageFireOffsets[i] = nOffset.Get();
+			anyDamageFireOffset = true;
+		}
+
+		if (anyDamageFireOffset)
+			this->Art_Facings_DamageFireOffsets[idx] = std::move(damageFireOffsets);
 	}
 
 	// PlacementPreview
@@ -893,6 +1055,9 @@ void BuildingTypeExt::Serialize(T& Stm)
 		.Process(this->Academy_Country_Ignore)
 		.Process(this->AutoUpgrade)
 		.Process(this->AI_BasePlan_Rebuild)
+		.Process(this->Art_Facings)
+		.Process(this->Art_Facings_MuzzleFlashes)
+		.Process(this->Art_Facings_DamageFireOffsets)
 
 		// Ares 0.2
 		.Process(this->CloningFacility)
@@ -913,6 +1078,10 @@ void BuildingTypeExt::LoadFromStream(PhobosStreamReader& Stm)
 {
 	TechnoTypeExt::LoadFromStream(Stm);
 	this->Serialize(Stm);
+
+	// image pointers are not saved, reload them on first use
+	this->Art_Facings_Images.clear();
+	this->Art_Facings_ImagesTheater.reset();
 }
 
 void BuildingTypeExt::SaveToStream(PhobosStreamWriter& Stm)

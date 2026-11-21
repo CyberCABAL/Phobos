@@ -784,6 +784,40 @@ Adjacent.Disallowed.ProhibitDistance=0  ; integer, cell offset
 NoBuildAreaOnBuildup=false              ; boolean
 ```
 
+### Building art facings
+
+- A BuildingType can pick its image per building from a list of art sections, based on the facing the building is placed with. One BuildingType can then replace several directional copies (for example bunkers) that would each need their own `rulesmd.ini` section.
+- The facing is the facing field of the map's `[Structures]` lines, the same value that sets a turret's starting facing. Buildings placed in other ways (by players, the AI or triggers) use the facing the game gives them at placement.
+- `Art.Facings` lists `artmd.ini` sections. They need no `rulesmd.ini` section and no `[BuildingTypes]` entry. The first entry is for facing 0 (north, top-right on screen), and the next ones go clockwise. With 8 entries the order is: top-right, right, bottom-right, bottom, bottom-left, left, top-left, top. Each entry covers the facings closest to it, so any number of entries works, for example 4 for north, east, south and west (top-right, bottom-right, bottom-left and top-left on screen).
+- Each listed art section provides the image. The SHP file name is the section's `Image=` if set, otherwise the section name. The same theater rules as for building images apply: the second letter of names like `CAxxx` or `NTxxx` is replaced with the theater letter, with a fallback to `G`. `Theater=` can be set per section and defaults to the BuildingType's value.
+- Each listed art section can also set the garrison fire ports (`MuzzleFlashN`) and the damage fire positions (`DamageFireOffsetN`), which work like the BuildingType's own. A section that sets none of the `MuzzleFlashN` keys uses the BuildingType's fire ports, and the same goes for `DamageFireOffsetN`. As in the game, the damage fire list ends at the first offset that is not set.
+- Everything else still comes from the BuildingType's own art section, including the foundation, bib, `ZShapePointMove`, animations and buildup. The variant images must use the same frame layout as the BuildingType's own image (normal and damaged frames, rubble, shadows).
+- A building keeps its variant for its whole life, also when saved and loaded, and fogged buildings show its image too. The rubble it leaves with `LeaveRubble=yes` also comes from its variant image. If the BuildingType has a separate `Rubble=` image instead, all variants share it. If a listed image cannot be loaded, the BuildingType's own image is used and a warning is written to the log.
+- Map editors show the BuildingType's own image until they support this key.
+
+In `rulesmd.ini`:
+```ini
+[SOMEBUILDING]    ; BuildingType
+Art.Facings=      ; list of artmd.ini sections, the first for facing 0 (north, top-right on screen), then clockwise
+```
+
+:::{note}
+Example: one bench type with 4 directions instead of 4 bench types.
+```ini
+; rulesmd.ini
+[CABENCH]
+Image=CABENCH
+Art.Facings=CABENCH_N,CABENCH_E,CABENCH_S,CABENCH_W
+
+; artmd.ini
+[CABENCH_N]
+Image=CABNCH01
+[CABENCH_E]
+Image=CABNCH02
+; ...
+```
+:::
+
 ### Building placing and deploying logic enhancement
 
 - In vanilla games, buildings are always cannot placing or deploying on the cells that other infantries or units on. Now this can be changed by setting `ExtendedBuildingPlacing` to true, when you try to place the building on these cells, it will check whether the occupiers can be scatter by yourself (include your own technos and allies technos) and whether there are enough spaces to scatter. If can, it will record which building you are placing and show a preview to you and your allies, then start a timer to record this placement and order the occupiers to leave this building area. When the area is cleared, the building will be truly place down and the production queue will be restored to original state. But when the timer expires or an unexpected situation has occurred which make the building impossible be constructed here anymore, it will stop the action and play "cannot deploy here", then you should re-place or re-deploy the building in a valid space.

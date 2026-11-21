@@ -34,17 +34,30 @@ DEFINE_HOOK(0x44043D, BuildingClass_AI_Temporaled_Chronosparkle_MuzzleFix, 0x8)
 	return 0;
 }
 
+// Fire port of an occupant slot: the building's Art.Facings entry, else more than 10 occupants, else vanilla.
+static const Point2D* GetOccupierMuzzleFlash(BuildingClass* pThis, int occupantIndex)
+{
+	auto const pExt = BuildingExt::TryFetch(pThis);
+	const int artFacingIndex = pExt ? pExt->ArtFacingIndex : -1;
+
+	return BuildingTypeExt::Fetch(pThis->Type)->GetOccupierMuzzleFlash(artFacingIndex, occupantIndex);
+}
+
 DEFINE_HOOK(0x45387A, BuildingClass_FireOffset_Replace_MuzzleFix, 0xA)
 {
 	GET(BuildingClass*, pThis, ESI);
 
-	auto const pType = pThis->Type;
+	R->EDX(GetOccupierMuzzleFlash(pThis, pThis->FiringOccupantIndex));
 
-	if (pType->MaxNumberOccupants > 10)
-	{
-		auto const pTypeExt = BuildingTypeExt::Fetch(pType);
-		R->EDX(&pTypeExt->OccupierMuzzleFlashes[pThis->FiringOccupantIndex]);
-	}
+	return 0;
+}
+
+// The second occupant fire coordinate function (0x453A70), same code as at 0x45387A.
+DEFINE_HOOK(0x453AA9, BuildingClass_FireCoords_Replace_MuzzleFix, 0xA)
+{
+	GET(BuildingClass*, pThis, ESI);
+
+	R->EDX(GetOccupierMuzzleFlash(pThis, pThis->FiringOccupantIndex));
 
 	return 0;
 }
@@ -54,13 +67,7 @@ DEFINE_HOOK(0x458623, BuildingClass_KillOccupiers_Replace_MuzzleFix, 0x7)
 	GET(const int, nFiringIndex, EDI);
 	GET(BuildingClass*, pThis, ESI);
 
-	auto const pType = pThis->Type;
-
-	if (pType->MaxNumberOccupants > 10)
-	{
-		auto const pTypeExt = BuildingTypeExt::Fetch(pType);
-		R->ECX(&pTypeExt->OccupierMuzzleFlashes[nFiringIndex]);
-	}
+	R->ECX(GetOccupierMuzzleFlash(pThis, nFiringIndex));
 
 	return 0;
 }

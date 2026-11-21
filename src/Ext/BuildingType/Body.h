@@ -152,6 +152,15 @@ public:
 	Valueable<bool> AutoUpgrade;
 	Nullable<bool> AI_BasePlan_Rebuild;
 
+	// Art sections picked by the building's placement facing, see GetArtFacingIndex.
+	std::vector<std::string> Art_Facings;
+	// Images of Art_Facings, loaded on first use for the current theater. Not saved.
+	std::vector<SHPStruct*> Art_Facings_Images;
+	std::optional<TheaterType> Art_Facings_ImagesTheater;
+	// MuzzleFlashN and DamageFireOffsetN of each Art_Facings section, empty if the section sets none.
+	std::vector<std::vector<Point2D>> Art_Facings_MuzzleFlashes;
+	std::vector<std::vector<Point2D>> Art_Facings_DamageFireOffsets;
+
 	// Ares 0.2
 	Valueable<bool> CloningFacility;
 
@@ -275,6 +284,12 @@ public:
 		, AutoUpgrade { false }
 		, AI_BasePlan_Rebuild {}
 
+		, Art_Facings {}
+		, Art_Facings_Images {}
+		, Art_Facings_ImagesTheater {}
+		, Art_Facings_MuzzleFlashes {}
+		, Art_Facings_DamageFireOffsets {}
+
 		// Ares 0.2
 		, CloningFacility { false }
 
@@ -294,6 +309,15 @@ public:
 	{
 		return static_cast<BuildingTypeClass*>(this->TechnoTypeExt::OwnerObject());
 	}
+
+	// Art.Facings entry for a placement facing, or -1 if the type has none.
+	int GetArtFacingIndex(DirType facing) const;
+	// Image of an Art.Facings entry, or nullptr to use the type's own image.
+	SHPStruct* GetArtFacingImage(int index);
+	// Fire port of an occupant slot, from the Art.Facings entry if it sets them (index -1 for none).
+	const Point2D* GetOccupierMuzzleFlash(int artFacingIndex, int occupantIndex) const;
+	// The 8 damage fire offsets of an Art.Facings entry, or nullptr to use the type's own.
+	const Point2D* GetArtFacingDamageFireOffsets(int artFacingIndex) const;
 
 	// Ares 0.A functions
 	int GetSuperWeaponCount() const;

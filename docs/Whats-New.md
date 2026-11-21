@@ -2076,6 +2076,7 @@ PreserveCSFWhitespace=false      ; boolean
 - [Cosmetic lasers while a weapon charges up](New-or-Enhanced-Logics.md#charge-lasers) (by CyberCABAL)
 - [Attached effects can grant or remove the Mirage Tank style `DisguiseWhenStill` disguise, and choose its TerrainTypes](New-or-Enhanced-Logics.md#attached-effects) (by CyberCABAL)
 - [Locomotor warheads can ignore the target's speed modifiers when pulling it](Fixed-or-Improved-Logics.md#customizing-locomotor-warhead) (by CyberCABAL)
+- [Building art facings: a BuildingType can pick its image and certain properties per building from the facing it is placed with](New-or-Enhanced-Logics.md#building-art-facings) (by CyberCABAL)
 
 #### Vanilla fixes:
 - Fixed the bug that buildings with passengers cannot unload via the Deploy hotkey or command bar button (by Noble_Fish)

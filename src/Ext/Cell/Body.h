@@ -46,6 +46,7 @@ public:
 	std::vector<RadSiteClass*> RadSites {};
 	std::vector<RadLevel> RadLevels { };
 	int InfantryCount{ 0 };
+	int RubbleArtFacingIndex { -1 }; // Art.Facings entry of the building that left CellClass::Rubble here
 
 	CellExt(CellClass* OwnerObject) : AbstractExt(OwnerObject)
 	{ }
