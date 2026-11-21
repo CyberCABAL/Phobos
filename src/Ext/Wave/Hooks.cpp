@@ -2,28 +2,31 @@
 
 #include <Ext/WeaponType/Body.h>
 
+#include <FootClass.h>
+#include <TechnoClass.h>
+
 #include <algorithm>
 #include <cmath>
 
 // In this file the "firer end" of a wave is what YRpp calls its start, and the "target end" is what YRpp calls its end.
 
-// Returns the extension of the weapon that fired a laser wave, or nullptr for other waves or when the weapon is unknown.
-// Sonic wave drawing indexes fixed-size color data by a pixel's distance from the wave (see the crash fixes in
-// Misc/Hooks.BugFixes.cpp), so the customizations here only apply to lasers.
-static WeaponTypeExt* GetLaserWaveWeaponExt(WaveClass* pThis)
+// Returns the extension of the weapon that fired a wave, or nullptr when the weapon is unknown.
+static WeaponTypeExt* GetWaveWeaponExt(WaveClass* pThis)
 {
-	if (pThis->Type != WaveType::Laser && pThis->Type != WaveType::BigLaser)
-		return nullptr;
-
 	const auto pExt = WaveExt::TryFetch(pThis);
 
 	return pExt && pExt->Weapon ? WeaponTypeExt::Fetch(pExt->Weapon) : nullptr;
 }
 
+#pragma region MinimumLength
+
 // The WaveClass constructor removes the wave right away when its two ends are less than 240 leptons apart horizontally.
-// Nothing in the laser drawing needs that much: it only needs a beam longer than zero, with room for its tips. Let
-// Wave.MinimumLength change the distance for laser waves. At this address the game has compared the distance with 240 and
-// is about to pick the branch from the result, so the test is redone here with the weapon's minimum, the same way.
+// No WaveType's drawing needs that much, only a wave longer than zero with room for its tips. The check is only made when
+// the wave is created: an existing wave is redrawn every frame between its firer and its target and is never removed for
+// being short, so short waves are already drawn whenever the target comes closer later. Sonic drawing looks its colors up
+// by each pixel's screen distance from the start of the wave, which a shorter wave only makes smaller. So Wave.MinimumLength
+// replaces the 240 for every wave fired by a weapon. At this address the game has compared the distance with 240 and is
+// about to branch on the result, so the test is redone here with the weapon's minimum.
 DEFINE_HOOK(0x75EA8C, WaveClass_CTOR_MinimumLength, 0x5)
 {
 	enum { KeepWave = 0x75EAA3, RemoveWave = 0x75EA93 };
@@ -37,14 +40,29 @@ DEFINE_HOOK(0x75EA8C, WaveClass_CTOR_MinimumLength, 0x5)
 
 	// WaveClass_CTOR has already given the wave its extension and weapon. The value was limited to
 	// WeaponTypeExt::WaveMinimumLengthMinValue - WaveMinimumLengthMaxValue when read.
-	const auto pWeaponExt = GetLaserWaveWeaponExt(pThis);
-	const int minimumLength = pWeaponExt ? pWeaponExt->Wave_MinimumLength.Get(DefaultMinimumLength) : DefaultMinimumLength;
+	const auto pWeaponExt = GetWaveWeaponExt(pThis);
+	const long long minimumLength = pWeaponExt ? pWeaponExt->Wave_MinimumLength.Get(DefaultMinimumLength) : DefaultMinimumLength;
 
+	// Compared squared, so no square root is needed.
 	const long long dx = pFrom->X - pTo->X;
 	const long long dy = pFrom->Y - pTo->Y;
-	const double distance = std::sqrt(static_cast<double>(dx * dx + dy * dy));
 
-	return distance < minimumLength ? RemoveWave : KeepWave;
+	return dx * dx + dy * dy < minimumLength * minimumLength ? RemoveWave : KeepWave;
+}
+
+#pragma endregion
+
+#pragma region LaserWaves
+
+// Returns the extension of the weapon that fired a laser wave, or nullptr for other waves or when the weapon is unknown.
+// Sonic wave drawing indexes fixed-size color data by a pixel's distance from the wave (see the crash fixes in
+// Misc/Hooks.BugFixes.cpp), so Wave.Shape and Wave.ExtraDraw only apply to laser waves.
+static WeaponTypeExt* GetLaserWaveWeaponExt(WaveClass* pThis)
+{
+	if (pThis->Type != WaveType::Laser && pThis->Type != WaveType::BigLaser)
+		return nullptr;
+
+	return GetWaveWeaponExt(pThis);
 }
 
 // WaveClass::Draw_NonMagnetic does not draw the beam between the two points it is given (the firer's FLH and the target).
@@ -260,6 +278,21 @@ static int GetConvexHull(const Point2D* pPoints, int count, Point2D* pHull)
 	return size;
 }
 
+// Returns twice the signed area of an outline. Its sign tells which way round the points go.
+static long long GetDoubleSignedArea(const Point2D* pPoints, int count)
+{
+	long long area = 0;
+
+	for (int i = 0; i < count; ++i)
+	{
+		const auto& a = pPoints[i];
+		const auto& b = pPoints[(i + 1) % count];
+		area += static_cast<long long>(a.X) * b.Y - static_cast<long long>(b.X) * a.Y;
+	}
+
+	return area;
+}
+
 // The game rounds each point of the wave's outline to whole screen pixels. On a very flat end, such as a short tip or none
 // at all (Wave.Shape), the tip can then end up a pixel inside the line between its side corners. That bends the outline
 // inward, and if it bends up and back down, WaveClass_RasterizePolygon_NonMonotoneFix refuses to fill it and the beam is
@@ -307,23 +340,8 @@ DEFINE_HOOK(0x760A71, WaveClass_DrawLaser_RoundingFix, 0x6)
 	if (!hullCount)
 		return CallFill;
 
-	// Twice the signed area: its sign tells which way round the points go.
-	const auto getWinding = [](const Point2D* pOutline, int outlineCount)
-	{
-		long long area = 0;
-
-		for (int i = 0; i < outlineCount; ++i)
-		{
-			const auto& a = pOutline[i];
-			const auto& b = pOutline[(i + 1) % outlineCount];
-			area += static_cast<long long>(a.X) * b.Y - static_cast<long long>(b.X) * a.Y;
-		}
-
-		return area;
-	};
-
 	// Keep the points going round the same way as the game's outline.
-	if ((getWinding(pPoints, count) < 0) != (getWinding(hull, hullCount) < 0))
+	if ((GetDoubleSignedArea(pPoints, count) < 0) != (GetDoubleSignedArea(hull, hullCount) < 0))
 		std::reverse(hull, hull + hullCount);
 
 	hullOutline = { hullCount, hull };
@@ -331,3 +349,83 @@ DEFINE_HOOK(0x760A71, WaveClass_DrawLaser_RoundingFix, 0x6)
 
 	return CallFill;
 }
+
+#pragma endregion
+
+#pragma region Magnetron
+
+// WaveClass::Draw_Magnetic(From, To) builds the outline of magnetron waves, the only WaveType that uses it. With Ares, From is
+// the firer's FLH and To the target's center, or the other way round when one of the weapon's Wave.ReverseAgainst* applies
+// (Wave.ReverseAgainstVehicles is on by default for IsMagBeam weapons, as vanilla drew such waves from vehicles to the firer).
+// The outline is a strip 100 leptons wide from From to To, after To has been raised by 50 leptons. Its corners come from a
+// table in a local frame where X runs along the ground from From (X = 0) to To (X = D, the ground distance between them).
+// Each corner then gets the height From.Z + X * (To.Z - From.Z) / L, but L is the full 3D distance between the two ends,
+// not D. So the To end only rises by the height difference times D / L, the cosine of the beam's slope, and the beam ends
+// below To, the more so the steeper it is. A unit lifted by a locomotor warhead close to its firer gets a beam that barely
+// rises at all.
+// At this address the game is about to round D (a float at [esp+0x40]) for the corners' X. L (an integer at [esp+0x24]) is
+// only used for the corner heights after this, so it is replaced with D here as well, and the To end of the strip reaches To.
+DEFINE_HOOK(0x762633, WaveClass_DrawMagnetic_HeightFix, 0x9)
+{
+	enum { SkipGameCode = 0x76263C };
+
+	GET_STACK(const float, groundDistance, 0x40);
+
+	// The game rounds towards zero here as well (0x7C5F00).
+	const int distance = static_cast<int>(groundDistance);
+
+	// When To is straight above From, D is 0 and so is every corner's X, so all corners get From's height whatever the
+	// divisor is. Only avoid dividing by zero.
+	R->Stack(0x24, std::max(distance, 1));
+	R->EAX(distance);
+
+	return SkipGameCode;
+}
+
+// A locomotor warhead (IsLocomotor) keeps hold of its target whether or not the target stays in weapon range: the target is
+// lifted up into the air, then pulled towards its firer, often closer than the weapon's MinimumRange. Vanilla draws the
+// magnetron beam for as long as its firer keeps that target. Ares (WaveClass_Update_Beam, 0x762B62) also ends a magnetron
+// beam in any frame where Owner->IsCloseEnough(Target, weapon) fails, a range and MinimumRange check in 3D, so the beam
+// disappears while the target is still held. While a magnetron wave whose firer holds its target with a locomotor warhead is
+// updated, that firer's range check against that target passes, so the beam lasts as long as the hold, as in vanilla.
+namespace MagnetronBeamTemp
+{
+	TechnoClass* pHoldingOwner = nullptr;
+}
+
+// In the wave update (0x762AF0), where both of its first branches meet, before Ares's WaveClass_Update_Beam.
+DEFINE_HOOK(0x762B29, WaveClass_AI_MagnetronHoldSet, 0x6)
+{
+	GET(WaveClass* const, pThis, ESI);
+
+	const auto pOwner = pThis->Owner;
+	const bool holding = pThis->Type == WaveType::Magnetron && pOwner && pThis->Target
+		&& pOwner->LocomotorTarget == pThis->Target;
+
+	MagnetronBeamTemp::pHoldingOwner = holding ? pOwner : nullptr;
+
+	return 0;
+}
+
+// The beam has been checked and drawn (Ares always continues at 0x762D57, where WaveClass_AI_TargetUnset is).
+DEFINE_HOOK(0x762D5D, WaveClass_AI_MagnetronHoldUnset, 0x6)
+{
+	MagnetronBeamTemp::pHoldingOwner = nullptr;
+
+	return 0;
+}
+
+// TechnoClass::IsCloseEnough(AbstractClass* pTarget, int weaponIndex), after it has returned true for no target.
+DEFINE_HOOK(0x6F77C9, TechnoClass_IsCloseEnough_MagnetronHold, 0x6)
+{
+	enum { ReturnTrue = 0x6F77BF };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET(AbstractClass* const, pTarget, EBX);
+
+	const auto pOwner = MagnetronBeamTemp::pHoldingOwner;
+
+	return pOwner && pThis == pOwner && pTarget == pThis->LocomotorTarget ? ReturnTrue : 0;
+}
+
+#pragma endregion

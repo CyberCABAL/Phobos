@@ -1042,9 +1042,10 @@ This page lists all the individual contributions to the project by their author.
   - Remove the 128 techno limit when executing a command
   - Raise the 16 nodes limit for planning node mode and the 128 total unit limit for a planning order to 256
 - **CyberCABAL**:
-  - Laser wave shape customization for Ares' `Wave.IsLaser` and `Wave.IsBigLaser`
+  - Wave customization (`Wave.Shape` and `Wave.ExtraDraw` for Ares laser waves, `Wave.MinimumLength` for all waves)
   - Cosmetic lasers while a weapon charges up
   - Attached effect `DisguiseWhenStill`, `StillDisguises` and `RemoveStillDisguises`
   - Disguised vehicle drawing fixes (TerrainType disguise frames and height, uncached voxel fade, SHP facing)
   - Removing `DisguiseWhenStill` disguises while a locomotor warhead holds the vehicle
   - `JumpjetSpeed.IgnoreSpeedMultipliers` for locomotor warheads
+  - Magnetron beam height fix, and keeping magnetron beams while a locomotor warhead holds the target

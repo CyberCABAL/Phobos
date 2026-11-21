@@ -352,6 +352,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
   - These fixes can be disabled by setting `[AudioVisual] -> StillDisguise.DrawFix=no` in `rulesmd.ini`.
 - Vehicles now lose their still disguise (`DisguiseWhenStill=true`, e.g. the Mirage Tank's tree) when grabbed by a locomotor warhead (`IsLocomotor=true`, e.g. the Magnetron's), and cannot disguise again until they have landed. Previously they kept the disguise while lifted, and could even take one in mid-air.
   - This can be disabled by setting `[General] -> StillDisguise.RemoveIfAttackedByLocomotor=no` in `rulesmd.ini`.
+- Fixed magnetron beams (`IsMagBeam=yes`) falling short of the height of the point they are drawn to (the target, or the firer when Ares' `Wave.ReverseAgainst*` reverses the beam), the more so the steeper the beam. A unit lifted close to its firer got a beam that barely rose. As in vanilla, the beam still ends 50 leptons above that point.
 
 ## Fixes / interactions with other extensions
 
@@ -413,6 +414,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed an issue in Ares where vehicles would occasionally continue to fire and move even after the driver had been killed.
 - Fixed the bug where passengers created by `InitialPayload` fail to participate in the transport squad reachability check.
 - Allowed TerrainType to use `Foundation=Custom`.
+- Magnetron beams (`IsMagBeam=yes`) no longer disappear while a locomotor warhead (`IsLocomotor=true`) still holds the target. Ares ends these beams once the target is out of the weapon's `Range` or inside its `MinimumRange` (measured in 3D), which a lifted or pulled target often is although the hold ignores range. Other magnetron beams still end out of range as in Ares.
 
 ## Newly added global settings
 

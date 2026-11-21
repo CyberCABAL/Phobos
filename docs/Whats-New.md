@@ -2072,7 +2072,7 @@ PreserveCSFWhitespace=false      ; boolean
 - Global default value for `Wake.Grapple`, `Wake.Sinking` and `FallingDownDamage.Water` (by Noble_Fish)
 - [Techno power overrides for AI budgeting](New-or-Enhanced-Logics.md#ai-power-budgeting) (by Noble_Fish)
 - [Control of AI base plan rebuilding](New-or-Enhanced-Logics.md#ai-base-plan-rebuilding) (by Noble_Fish)
-- [Laser wave shape customization for Ares' `Wave.IsLaser` and `Wave.IsBigLaser`](New-or-Enhanced-Logics.md#laser-wave-shape-customization) (by CyberCABAL)
+- [Wave customization: `Wave.Shape` and `Wave.ExtraDraw` for Ares laser waves, `Wave.MinimumLength` for all waves](New-or-Enhanced-Logics.md#wave-customization) (by CyberCABAL)
 - [Cosmetic lasers while a weapon charges up](New-or-Enhanced-Logics.md#charge-lasers) (by CyberCABAL)
 - [Attached effects can grant or remove the Mirage Tank style `DisguiseWhenStill` disguise, and choose its TerrainTypes](New-or-Enhanced-Logics.md#attached-effects) (by CyberCABAL)
 - [Locomotor warheads can ignore the target's speed modifiers when pulling it](Fixed-or-Improved-Logics.md#customizing-locomotor-warhead) (by CyberCABAL)
@@ -2098,8 +2098,9 @@ PreserveCSFWhitespace=false      ; boolean
 - Allowed repair and sell mode to be always toggleable instead of relying on the presence of `Insignificant=no` buildings (by Ollerus)
 - Fixed the issue where the AI-triggered reachability check incorrectly rejects reachable transport teams that are summarized as having `MovementZone` of `Amphibious`, `AmphibiousCrusher`, `AmphibiousDestroyer`, or `Fly` (by Noble_Fish)
 - Fixed the issue where AI triggers also perform reachability checks on teams that only execute guard, wait, or auxiliary script actions (by Noble_Fish)
-- Fixed TerrainType disguises (e.g. the Mirage Tank's tree) using wrong frames and floating above hovering vehicles, uncached voxel vehicles changing colour while fading into their disguise, and disguised SHP vehicles always facing north for their owner (by CyberCABAL)
+- Fixed TerrainType disguises (e.g. the Mirage Tank's tree) using wrong frames and floating above hovering vehicles, uncached voxel vehicles changing color while fading into their disguise, and disguised SHP vehicles always facing north for their owner (by CyberCABAL)
 - Vehicles now lose their `DisguiseWhenStill` disguise while held by a locomotor warhead, until they land (by CyberCABAL)
+- Fixed magnetron beams (`IsMagBeam=yes`) falling short of the height of their end point when the beam slopes (by CyberCABAL)
 
 #### Phobos fixes:
 - Fixed a game crash when parsing string list with null entry (by Ollerus)
@@ -2124,6 +2125,7 @@ PreserveCSFWhitespace=false      ; boolean
 - [Allow Ares Academy add country-level filters](New-or-Enhanced-Logics.md#allow-ares-academy-add-country-level-filters) (by dh381)
 - Fixed the bug where passengers created by `InitialPayload` fail to participate in the transport squad reachability check (by NetsuNegi & Noble_Fish)
 - Allowed TerrainType to use `Foundation=Custom` (by Noble_Fish)
+- Fixed magnetron beams disappearing out of weapon range (an Ares check) while a locomotor warhead still holds the target (by CyberCABAL)
 ```
 
 ### 0.5

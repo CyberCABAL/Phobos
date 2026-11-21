@@ -25,8 +25,8 @@ public:
 	static constexpr double WaveExtraDrawMaxValue = 1.0;
 
 	// Allowed Wave.MinimumLength values, in leptons. The smallest keeps the beam well over the 68 leptons that the two
-	// default tips of a Wave.IsLaser wave need, so they never overlap, and well away from a zero-length beam, which the game
-	// cannot draw. The largest matches WaveShapeMaxValue (10 cells).
+	// default tips of a Wave.IsLaser wave need (60 for sonic waves), so they never overlap, and well away from a zero-length
+	// wave, which the game cannot draw. The largest matches WaveShapeMaxValue (10 cells).
 	static constexpr int WaveMinimumLengthMinValue = 100;
 	static constexpr int WaveMinimumLengthMaxValue = 2560;
 

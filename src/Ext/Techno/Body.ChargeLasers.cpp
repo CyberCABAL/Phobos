@@ -9,8 +9,8 @@
 // ChargeLaser: purely cosmetic lasers drawn while a weapon charges up before it fires, looking like lasers fired by
 // an IsLaser weapon (ChargeLaser.Weapon) that is never fired itself. A beam is held at full brightness for as long as
 // it should be shown. Once it should not (the shot went off, the beam's End frame came, or the charge was interrupted)
-// it is let go and the game fades it out
-// over the laser weapon's LaserDuration, as with any fired laser. Held and fading beams are both kept on the object.
+// it is let go and the game fades it out over the laser weapon's LaserDuration, as with any fired laser. Held and fading
+// beams are both kept on the object.
 //
 // Lasers are deleted by the game on its own:
 // - LaserDrawClass::Update (0x550150, once per frame from LogicClass::Update) adds 1 to Progress.Value and deletes the
