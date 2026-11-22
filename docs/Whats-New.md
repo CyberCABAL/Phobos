@@ -2102,6 +2102,8 @@ PreserveCSFWhitespace=false      ; boolean
 - Fixed TerrainType disguises (e.g. the Mirage Tank's tree) using wrong frames and floating above hovering vehicles, uncached voxel vehicles changing color while fading into their disguise, and disguised SHP vehicles always facing north for their owner (by CyberCABAL)
 - Vehicles now lose their `DisguiseWhenStill` disguise while held by a locomotor warhead, until they land (by CyberCABAL)
 - Fixed magnetron beams (`IsMagBeam=yes`) falling short of the height of their end point when the beam slopes (by CyberCABAL)
+- Fixed vehicle transports favoring one side when choosing which way to unload, sometimes ignoring a free cell, and avoiding the South (by CyberCABAL)
+- Vehicle transports with no free cell to unload into now ask nearby allies to make room before giving up (by CyberCABAL)
 
 #### Phobos fixes:
 - Fixed a game crash when parsing string list with null entry (by Ollerus)
@@ -2116,6 +2118,7 @@ PreserveCSFWhitespace=false      ; boolean
 - Fixed inconsistent damage scaling for negative `PowerPlantEnhancer.Factor` values (by Noble_Fish)
 - Fixed the options menu reopening after leaving frame-by-frame mode if it had been opened while stepping (by Noble_Fish)
 - Fixed parasites that are not vehicles (e.g. infantry with a `Parasite=yes` warhead) reading `Parasite.AllowWaterExit` from invalid memory, which made them randomly survive or die when leaving a destroyed victim and caused desyncs (by FS-21)
+- Units asked to make room for vehicle transport passengers no longer leave missions with `Scatter=no` (by CyberCABAL)
 
 #### Fixes / interactions with other extensions:
 - Allowed `SW.ShowCameo` and `SW.ManualFire` to work independently of `SW.AutoFire` (by Noble_Fish)

@@ -1,5 +1,6 @@
 #include <Ext/Foot/Body.h>
 #include <Ext/Scenario/Body.h>
+#include <Ext/Unit/Body.h>
 #include <Utilities/AresHelper.h>
 #include <Utilities/AresFunctions.h>
 
@@ -405,18 +406,7 @@ DEFINE_HOOK(0x73DC9C, UnitClass_Mission_Unload_NoQueueUpToUnloadBreak, 0xA)
 	pPassenger->Undiscover();
 
 	// Clean up the unload space
-	const bool alt = pThis->OnBridge;
-	const auto pCell = pThis->GetCell();
-	const auto coord = pCell->GetCoords();
-
-	for (int i = 0; i < 8; ++i)
-	{
-		const auto pAdjCell = pCell->GetNeighbourCell(static_cast<FacingType>(i));
-		const auto pTechno = pAdjCell->FindTechnoNearestTo(Point2D::Empty, alt, pThis);
-
-		if (pTechno && pTechno->Owner->IsAlliedWith(pThis))
-			pAdjCell->ScatterContent(coord, true, true, alt);
-	}
+	UnitExt::ScatterAlliesAroundForUnload(pThis, false);
 
 	// Play the sound when interrupted
 	if (TransportUnloadTemp::ShouldPlaySound) // Only when NoQueueUpToUnload enabled
@@ -702,14 +692,8 @@ DEFINE_HOOK(0x740C9C, UnitClass_GetUnloadDirection_CheckUnloadPosition, 0x7)
 {
 	GET(UnitClass* const, pThis, EDI);
 
-	if (TechnoTypeExt::Fetch(pThis->Type)->AmphibiousUnload.Get(RulesExt::Global()->AmphibiousUnload))
-	{
-		if (const auto pPassenger = pThis->Passengers.GetFirstPassenger())
-		{
-			GET(const int, speedType, EDX);
-			R->EDX(speedType + static_cast<int>(pPassenger->GetTechnoType()->SpeedType)); // Replace hard code SpeedType::Foot
-		}
-	}
+	GET(const int, speedType, EDX);
+	R->EDX(speedType + static_cast<int>(UnitExt::GetUnloadCheckSpeedType(pThis))); // Replace hard code SpeedType::Foot
 
 	return 0;
 }

@@ -40,6 +40,8 @@ void UnitExt::Serialize(T& Stm)
 		.Process(this->KeepTargetOnMove)
 		.Process(this->SimpleDeployerAnimationTimer)
 		.Process(this->UnitAutoDeployTimer)
+		.Process(this->UnloadNudgeMissionStart)
+		.Process(this->UnloadNudgeCount)
 		.Process(this->ExtraTurretRecoil)
 		.Process(this->ExtraBarrelRecoil)
 		;
@@ -199,6 +201,53 @@ void UnitExt::DepletedAmmoActions()
 				pJJLoco->State = JumpjetLocomotionClass::State::Ascending;
 		}
 	}
+}
+
+// The SpeedType the unload direction check (0x740B60) tests neighbour cells with.
+// Vanilla always uses Foot, AmphibiousUnload switches it to the first passenger's.
+SpeedType UnitExt::GetUnloadCheckSpeedType(UnitClass* pThis)
+{
+	if (TechnoTypeExt::Fetch(pThis->Type)->AmphibiousUnload.Get(RulesExt::Global()->AmphibiousUnload))
+	{
+		if (const auto pPassenger = pThis->Passengers.GetFirstPassenger())
+			return pPassenger->GetTechnoType()->SpeedType;
+	}
+
+	return SpeedType::Foot;
+}
+
+// Ask allied units in the 8 cells around a transport to move away so its passengers can get out.
+// If passableOnly is set, only cells the passengers could stand on are cleared.
+// Units whose current mission has [Mission] -> Scatter=no (e.g. Sleep, Unload, Attack) are left alone,
+// so they keep the mission a map or another transport needs them to stay in.
+// Returns true if any cell with an allied unit in it was asked to scatter.
+bool UnitExt::ScatterAlliesAroundForUnload(UnitClass* pThis, bool passableOnly)
+{
+	const bool alt = pThis->OnBridge;
+	const auto pCell = pThis->GetCell();
+	const auto coord = pCell->GetCoords();
+	const int speedType = static_cast<int>(UnitExt::GetUnloadCheckSpeedType(pThis));
+	bool scattered = false;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		const auto pAdjCell = pCell->GetNeighbourCell(static_cast<FacingType>(i));
+
+		if (passableOnly && GroundType::Array[static_cast<int>(pAdjCell->LandType)].Cost[speedType] == 0.0f)
+			continue;
+
+		const auto pTechno = pAdjCell->FindTechnoNearestTo(Point2D::Empty, alt, pThis);
+
+		if (pTechno && pTechno->Owner->IsAlliedWith(pThis))
+		{
+			pAdjCell->ScatterContent(coord, false, true, alt); // Respect the mission's Scatter flag, ignore destinations
+
+			if (pTechno->WhatAmI() != AbstractType::Building)
+				scattered = true;
+		}
+	}
+
+	return scattered;
 }
 
 bool UnitExt::HasAmmoToDeploy(UnitClass* pThis)

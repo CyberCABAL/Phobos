@@ -21,6 +21,8 @@ public:
 	bool KeepTargetOnMove;
 	CDTimerClass SimpleDeployerAnimationTimer;
 	CDTimerClass UnitAutoDeployTimer;
+	int UnloadNudgeMissionStart; // CurrentMissionStartTime of the unload mission being retried
+	int UnloadNudgeCount;
 
 	std::vector<RecoilData> ExtraTurretRecoil;
 	std::vector<RecoilData> ExtraBarrelRecoil;
@@ -33,6 +35,8 @@ public:
 		, KeepTargetOnMove { false }
 		, SimpleDeployerAnimationTimer {}
 		, UnitAutoDeployTimer {}
+		, UnloadNudgeMissionStart { -1 }
+		, UnloadNudgeCount { 0 }
 		, ExtraTurretRecoil {}
 		, ExtraBarrelRecoil {}
 	{ }
@@ -53,6 +57,8 @@ public:
 	static bool SimpleDeployerAllowedToDeploy(UnitClass* pThis, bool defaultValue, bool alwaysCheckLandTypes);
 	static bool CanDeployIntoBuilding(UnitClass* pThis, bool noDeploysIntoDefaultValue = false);
 	static UnitTypeClass* GetUnitTypeExtra(UnitClass* pUnit, UnitTypeExt* pData);
+	static SpeedType GetUnloadCheckSpeedType(UnitClass* pThis);
+	static bool ScatterAlliesAroundForUnload(UnitClass* pThis, bool passableOnly);
 
 	UnitClass* OwnerObject() const
 	{
