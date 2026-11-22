@@ -1109,6 +1109,7 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
 	this->NoQueueUpToEnter_BoardDistance.Read(exINI, pSection, "NoQueueUpToEnter.BoardDistance");
 	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
+	this->TurnToUnload.Read(exINI, pSection, "TurnToUnload");
 
 	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
 	this->RateDown_Reset.Read(exINI, pSection, "RateDown.Reset");
@@ -1703,6 +1704,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->NoQueueUpToEnter_BoardDistance)
 		.Process(this->NoQueueUpToUnload)
+		.Process(this->TurnToUnload)
 
 		.Process(this->RateDown_Delay)
 		.Process(this->RateDown_Reset)

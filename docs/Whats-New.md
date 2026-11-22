@@ -2077,6 +2077,7 @@ PreserveCSFWhitespace=false      ; boolean
 - [Attached effects can grant or remove the Mirage Tank style `DisguiseWhenStill` disguise, and choose its TerrainTypes](New-or-Enhanced-Logics.md#attached-effects) (by CyberCABAL)
 - [Locomotor warheads can ignore the target's speed modifiers when pulling it](Fixed-or-Improved-Logics.md#customizing-locomotor-warhead) (by CyberCABAL)
 - [Building art facings: a BuildingType can pick its image and certain properties per building from the facing it is placed with](New-or-Enhanced-Logics.md#building-art-facings) (by CyberCABAL)
+- [Vehicle transports can unload without turning first](New-or-Enhanced-Logics.md#turn-to-unload) (by CyberCABAL)
 
 #### Vanilla fixes:
 - Fixed the bug that buildings with passengers cannot unload via the Deploy hotkey or command bar button (by Noble_Fish)
@@ -2103,6 +2104,9 @@ PreserveCSFWhitespace=false      ; boolean
 - Vehicles now lose their `DisguiseWhenStill` disguise while held by a locomotor warhead, until they land (by CyberCABAL)
 - Fixed magnetron beams (`IsMagBeam=yes`) falling short of the height of their end point when the beam slopes (by CyberCABAL)
 - Fixed vehicle transports favoring one side when choosing which way to unload, sometimes ignoring a free cell, and avoiding the South (by CyberCABAL)
+- Fixed vehicle transports waiting for their turret, not their body, to finish turning before letting passengers out (by CyberCABAL)
+- Fixed vehicle transports turning to unload towards cells their passengers cannot get out to, such as walls or terrain objects (by CyberCABAL)
+- Fixed passengers never getting out right behind the transport when they could not move further out on any side (by CyberCABAL)
 - Vehicle transports with no free cell to unload into now ask nearby allies to make room before giving up (by CyberCABAL)
 
 #### Phobos fixes:

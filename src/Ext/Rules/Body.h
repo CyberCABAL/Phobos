@@ -105,6 +105,7 @@ public:
 		Valueable<bool> NoQueueUpToUnload;
 		Nullable<bool> NoQueueUpToEnter_Buildings;
 		Nullable<bool> NoQueueUpToUnload_Buildings;
+		Valueable<bool> TurnToUnload;
 
 		Valueable<bool> JumpjetTilt;
 		Valueable<double> JumpjetTilt_ForwardAccelFactor;
@@ -661,6 +662,7 @@ public:
 			, NoQueueUpToUnload { false }
 			, NoQueueUpToEnter_Buildings {}
 			, NoQueueUpToUnload_Buildings {}
+			, TurnToUnload { true }
 
 			, JumpjetTilt { false }
 			, JumpjetTilt_ForwardAccelFactor { 1.0 }

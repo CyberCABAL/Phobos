@@ -1050,4 +1050,4 @@ This page lists all the individual contributions to the project by their author.
   - `JumpjetSpeed.IgnoreSpeedMultipliers` for locomotor warheads
   - Magnetron beam height fix, and keeping magnetron beams while a locomotor warhead holds the target
   - Building art facings (`Art.Facings`)
-  - Vehicle transport unload direction and crowding fixes
+  - Vehicle transport unload direction and crowding fixes, `TurnToUnload`

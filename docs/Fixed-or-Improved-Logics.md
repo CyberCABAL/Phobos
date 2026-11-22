@@ -354,6 +354,9 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
   - This can be disabled by setting `[General] -> StillDisguise.RemoveIfAttackedByLocomotor=no` in `rulesmd.ini`.
 - Fixed magnetron beams (`IsMagBeam=yes`) falling short of the height of the point they are drawn to (the target, or the firer when Ares' `Wave.ReverseAgainst*` reverses the beam), the more so the steeper the beam. A unit lifted close to its firer got a beam that barely rose. As in vanilla, the beam still ends 50 leptons above that point.
 - Fixed vehicle transports favoring one side when choosing which way to unload, sometimes ignoring a free cell and giving up, and avoiding unloading towards the South.
+- Fixed vehicle transports waiting for their turret, not their body, to finish turning before letting passengers out.
+- Fixed vehicle transports turning to unload towards cells their passengers cannot get out to, such as walls or terrain objects. Cells the passengers can also move on from are now preferred, as passengers try those first.
+- Fixed passengers never getting out right behind the transport when they could not move further out on any side.
 - Vehicle transports with no free cell next to them now ask the allied units there to make room and retry up to 5 times before giving up. Units asked to make room for passengers no longer leave missions with `Scatter=no`, such as Sleep or Unload.
 
 ## Fixes / interactions with other extensions

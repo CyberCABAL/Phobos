@@ -3009,6 +3009,19 @@ BurstPerTurret=0            ; integer
 This is essentially designed to restore multi-turrets in RA1, not to help you make a Zantos. Therefore, features like different turrets using different weapons/targeting separately/calculating cooldown separately/having separate health are not within the scope of this function. Please use techno attachment for such requirements.
 ```
 
+### Turn to unload
+
+- Vehicle transports normally turn their rear towards a free cell before their passengers get out. `TurnToUnload=false` makes them unload without turning, as trains (`IsTrain=yes`) do.
+
+In `rulesmd.ini`:
+```ini
+[General]
+TurnToUnload=true    ; boolean
+
+[SOMEVEHICLE]        ; VehicleType, transport
+TurnToUnload=        ; boolean, default to [General] -> TurnToUnload
+```
+
 ### Turret Response
 
 - When the vehicle loses its target, you can customize whether to align the turret direction with the vehicle body.

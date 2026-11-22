@@ -201,6 +201,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->NoQueueUpToUnload.Read(exINI, GameStrings::General, "NoQueueUpToUnload");
 	this->NoQueueUpToEnter_Buildings.Read(exINI, GameStrings::General, "NoQueueUpToEnter.Buildings");
 	this->NoQueueUpToUnload_Buildings.Read(exINI, GameStrings::General, "NoQueueUpToUnload.Buildings");
+	this->TurnToUnload.Read(exINI, GameStrings::General, "TurnToUnload");
 
 	this->JumpjetTilt.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt");
 	this->JumpjetTilt_ForwardAccelFactor.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt.ForwardAccelFactor");
@@ -835,6 +836,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoQueueUpToUnload)
 		.Process(this->NoQueueUpToEnter_Buildings)
 		.Process(this->NoQueueUpToUnload_Buildings)
+		.Process(this->TurnToUnload)
 		.Process(this->JumpjetTilt)
 		.Process(this->JumpjetTilt_ForwardAccelFactor)
 		.Process(this->JumpjetTilt_ForwardSpeedFactor)

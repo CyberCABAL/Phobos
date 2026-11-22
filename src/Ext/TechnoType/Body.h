@@ -344,6 +344,7 @@ public:
 	Nullable<bool> NoQueueUpToEnter;
 	Nullable<int> NoQueueUpToEnter_BoardDistance;
 	Nullable<bool> NoQueueUpToUnload;
+	Nullable<bool> TurnToUnload;
 
 	Valueable<int> RateDown_Delay;
 	Valueable<bool> RateDown_Reset;
@@ -792,6 +793,7 @@ public:
 		, NoQueueUpToEnter {}
 		, NoQueueUpToEnter_BoardDistance {}
 		, NoQueueUpToUnload {}
+		, TurnToUnload {}
 
 		, RateDown_Delay { 0 }
 		, RateDown_Reset { false }
