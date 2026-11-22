@@ -457,6 +457,11 @@ DEFINE_HOOK(0x67FDB1, LoadOptionsClass_GetFileInfo, 0x7)
  */
 static DWORD DebuggerPID = 0;
 
+// Holds the only handle to the job Syringe was put in. Never closed on
+// purpose: the kernel closes it when this process ends, which is what kills
+// Syringe.
+static HANDLE DebuggerJob = nullptr;
+
 void _cdecl Kill_Debugger()
 {
 	if (DebuggerPID != 0)
@@ -470,10 +475,58 @@ void _cdecl Kill_Debugger()
 	}
 }
 
+// Once detached, Syringe never gets the game's exit event and would wait
+// forever. atexit only runs if the game exits through DLL_PROCESS_DETACH,
+// which the crash handler's TerminateProcess, Task Manager and faults during
+// shutdown all skip. A job with KILL_ON_JOB_CLOSE whose only handle lives in
+// this process ends Syringe however the game ends. Best effort: on failure
+// (e.g. no nested jobs on Windows 7) only the atexit path remains. Wine
+// supports both job kill-on-close and nested jobs. Returns a Win32 error code,
+// or ERROR_SUCCESS once Syringe is in the job.
+static DWORD Tie_Debugger_To_Process(DWORD pid)
+{
+	HANDLE hDebugger = OpenProcess(PROCESS_SET_QUOTA | PROCESS_TERMINATE, FALSE, pid);
+	if (!hDebugger)
+		return GetLastError();
+
+	DWORD error = ERROR_SUCCESS;
+
+	// Not inheritable, so a child process of the game can't keep Syringe alive.
+	if (HANDLE hJob = CreateJobObjectA(nullptr, nullptr))
+	{
+		JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits {};
+		limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+
+		// Set the limit before assigning: closing a job that holds Syringe with
+		// this limit set would kill it on the spot.
+		if (!SetInformationJobObject(hJob, JobObjectExtendedLimitInformation, &limits, sizeof(limits))
+			|| !AssignProcessToJobObject(hJob, hDebugger))
+		{
+			error = GetLastError();
+			CloseHandle(hJob);
+		}
+		else
+		{
+			DebuggerJob = hJob;
+		}
+	}
+	else
+	{
+		error = GetLastError();
+	}
+
+	CloseHandle(hDebugger);
+	return error;
+}
+
 void Setup_Kill_Debugger(DWORD pid)
 {
 	DebuggerPID = pid;
 	atexit(Kill_Debugger);
+
+	const DWORD error = Tie_Debugger_To_Process(pid);
+	if (error != ERROR_SUCCESS)
+		Debug::Log("Could not tie Syringe's lifetime to the game (error %u); it may keep running after a crash.\n", error);
 }
 
 bool Phobos::DetachFromDebugger()
