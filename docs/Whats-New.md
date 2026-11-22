@@ -2109,6 +2109,7 @@ PreserveCSFWhitespace=false      ; boolean
 - Fixed passengers never getting out right behind the transport when they could not move further out on any side (by CyberCABAL)
 - Fixed jumpjets told to deploy or stop while landing turning around instead of finishing their landing (by CyberCABAL)
 - Fixed landing jumpjets hovering over a vehicle that drove into their landing cell instead of picking another cell (by CyberCABAL)
+- Fixed jumpjets landing mid-turn and then turning further on the ground without their shadow (by CyberCABAL)
 - Vehicle transports with no free cell to unload into now ask nearby allies to make room before giving up (by CyberCABAL)
 
 #### Phobos fixes:

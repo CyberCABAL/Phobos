@@ -85,7 +85,13 @@ DEFINE_HOOK(0x736E6E, UnitClass_UpdateFiring_OmniFireTurnToTarget, 0x9)
 			if (pThis->GetRealFacing() != tgtDir)
 			{
 				if (auto const pLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
+				{
 					pLoco->LocomotionFacing.SetDesired(tgtDir);
+
+					// Landed jumpjets no longer sync PrimaryFacing to the locomotor facing (0x54D692).
+					if (pLoco->State == JumpjetLocomotionClass::State::Grounded)
+						pThis->PrimaryFacing.SetDesired(tgtDir);
+				}
 				else
 					pThis->PrimaryFacing.SetDesired(tgtDir);
 			}
@@ -279,6 +285,34 @@ DEFINE_HOOK(0x54D99C, JumpjetLocomotionClass_Mark_All_Occupation_Bits_RemarkOthe
 	GET_STACK(const CoordStruct, coords, 0x4); // The cell just unmarked
 
 	RemarkOtherVehicles(static_cast<JumpjetLocomotionClass*>(iLoco)->LinkedTo, coords);
+	return 0;
+}
+
+// SetCurrent (also vanilla 0x4C9300) only moves the target when the new facing differs from the current one,
+// so passing the current facing would end the turn at its target instead of stopping it where it is.
+static void StopTurning(FacingClass& facing, const DirStruct& dir)
+{
+	facing.DesiredFacing = dir;
+	facing.StartFacing = dir;
+	facing.RotationTimer.Start(0);
+}
+
+// A jumpjet touching down while still turning kept turning on the ground, but only its locomotor facing did.
+// The body is drawn with that facing, while the shadow, unloading and the next takeoff (0x54B9B2) use PrimaryFacing,
+// which stops following the locomotor facing once landed (0x54D692). Stop the turn where it is on touchdown.
+DEFINE_HOOK(0x54C9E4, JumpjetLocomotionClass_Descending_StopTurningOnLanding, 0x7)
+{
+	GET(JumpjetLocomotionClass*, pThis, ESI);
+
+	auto const pLinkedTo = pThis->LinkedTo;
+
+	if (!pLinkedTo->IsAttackedByLocomotor)
+	{
+		const auto facing = pThis->LocomotionFacing.Current();
+		StopTurning(pThis->LocomotionFacing, facing);
+		StopTurning(pLinkedTo->PrimaryFacing, facing);
+	}
+
 	return 0;
 }
 

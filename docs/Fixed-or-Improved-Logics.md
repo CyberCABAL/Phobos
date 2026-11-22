@@ -359,6 +359,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed passengers never getting out right behind the transport when they could not move further out on any side.
 - Fixed jumpjets told to deploy or stop while landing turning around instead of finishing their landing.
 - Fixed landing jumpjets hovering over a vehicle that drove into their landing cell instead of picking another cell.
+- Fixed jumpjets landing mid-turn and then turning further on the ground without their shadow. They now stop turning when they touch down. Jumpjets on the ground turning to their target with `OmniFire.TurnToTarget` now turn their shadow too.
 - Vehicle transports with no free cell next to them now ask the allied units there to make room and retry up to 5 times before giving up. Units asked to make room for passengers no longer leave missions with `Scatter=no`, such as Sleep or Unload.
 
 ## Fixes / interactions with other extensions
