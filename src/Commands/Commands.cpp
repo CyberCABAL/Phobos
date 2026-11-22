@@ -8,6 +8,7 @@
 #include "FrameStep.h"
 #include "ToggleDigitalDisplay.h"
 #include "ToggleDesignatorRange.h"
+#include "ToggleSmoothGroundLighting.h"
 #include "SaveVariablesToFile.h"
 #include "SelectCaptured.h"
 #include "ToggleSWSidebar.h"
@@ -38,6 +39,9 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 
 	if (Phobos::Config::ToggleDesignatorRangeCommand)
 		MakeCommand<ToggleDesignatorRangeCommandClass>();
+
+	if (Phobos::Config::ToggleSmoothGroundLightingCommand)
+		MakeCommand<ToggleSmoothGroundLightingCommandClass>();
 
 	if (Phobos::Config::MessageDisplayInCenter && Phobos::Config::ToggleMessageListCommand)
 		MakeCommand<ToggleMessageListCommandClass>();

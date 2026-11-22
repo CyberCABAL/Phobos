@@ -1052,3 +1052,4 @@ This page lists all the individual contributions to the project by their author.
   - Building art facings (`Art.Facings`)
   - Vehicle transport unload direction and crowding fixes, `TurnToUnload`
   - Jumpjet landing fixes (deploying or stopping while landing, vehicles moving into the landing cell, turning on the ground after landing mid-turn)
+  - Smooth ground lighting

@@ -464,6 +464,25 @@ In `RA2MD.INI`:
 ShowPowerPlantEnhancerRange=false  ; boolean
 ```
 
+### Smooth ground lighting
+
+- Vanilla lights each ground cell with a single tint and brightness, so light sources show as stepped diamonds. `SmoothGroundLighting` blends every ground pixel from the four nearest cells instead.
+  - Cells more than 2 height levels apart (cliffs) are not blended across. Cliff faces fade from the lighting at their foot to the lighting at their top.
+  - Only ground tiles change; walls, smudges, terrain objects and units keep per-cell lighting. `AlphaImage` lighting still applies. It doesn't affect multiplayer sync.
+- `[AudioVisual] -> SmoothGroundLighting` sets the mod's default; `SmoothGroundLighting` in `RA2MD.INI` overrides it if present. The ["Toggle Smooth Ground Lighting" hotkey](#toggle-smooth-ground-lighting) switches it for the session.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+SmoothGroundLighting=false    ; boolean
+```
+
+In `RA2MD.INI`:
+```ini
+[Phobos]
+;SmoothGroundLighting=true    ; boolean, leave the key out to use the mod's default
+```
+
 ### SuperWeapon ShowTimer sorting
 
 - You can now sort the timers of superweapons in ascending order from top to bottom according to a given priority value.
@@ -712,6 +731,18 @@ In `rulesmd.ini`:
 ```ini
 [GlobalControls]
 ToggleMessageListKeyEnabled=true    ; boolean
+```
+
+### `[ ]` Toggle Smooth Ground Lighting
+
+- Switches [smooth ground lighting](#smooth-ground-lighting) on/off for the session.
+- The hotkey can be disabled by setting `ToggleSmoothGroundLightingKeyEnabled` to false.
+- For localization add `TXT_SMOOTH_GROUND_LIGHTING`, `TXT_SMOOTH_GROUND_LIGHTING_DESC`, `MSG:SmoothGroundLightingOn` and `MSG:SmoothGroundLightingOff` into your `.csf` file.
+
+In `rulesmd.ini`:
+```ini
+[GlobalControls]
+ToggleSmoothGroundLightingKeyEnabled=true    ; boolean
 ```
 
 ```{important}

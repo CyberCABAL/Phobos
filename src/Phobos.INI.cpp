@@ -60,6 +60,7 @@ bool Phobos::Config::RealTimeTimers_Adaptive = false;
 int Phobos::Config::CampaignDefaultGameSpeed = 2;
 bool Phobos::Config::SkirmishUnlimitedColors = false;
 bool Phobos::Config::ShowDesignatorRange = false;
+bool Phobos::Config::SmoothGroundLighting = false;
 bool Phobos::Config::ShowPowerPlantEnhancerRange = false;
 bool Phobos::Config::SaveVariablesOnScenarioEnd = false;
 bool Phobos::Config::SaveGameOnScenarioStart = true;
@@ -82,6 +83,7 @@ bool Phobos::Config::NextIdleHarvesterCommand = true;
 bool Phobos::Config::QuickSaveCommand = true;
 bool Phobos::Config::ToggleDigitalDisplayCommand = true;
 bool Phobos::Config::ToggleDesignatorRangeCommand = true;
+bool Phobos::Config::ToggleSmoothGroundLightingCommand = true;
 bool Phobos::Config::ToggleMessageListCommand = true;
 bool Phobos::Config::ToggleSuperWeaponSidebarCommand = true;
 bool Phobos::Config::DeselectObjectCommand = true;
@@ -95,6 +97,11 @@ bool Phobos::Misc::CustomGS = false;
 int Phobos::Misc::CustomGS_ChangeInterval[7] = { -1, -1, -1, -1, -1, -1, -1 };
 int Phobos::Misc::CustomGS_ChangeDelay[7] = { 0, 1, 2, 3, 4, 5, 6 };
 int Phobos::Misc::CustomGS_DefaultDelay[7] = { 0, 1, 2, 3, 4, 5, 6 };
+
+// Smooth ground lighting: the mod sets the default in rulesmd.ini, a key in the player's
+// RA2MD.INI overrides it. The two files may be read in either order.
+static bool SmoothGroundLighting_PlayerSet = false;
+static bool SmoothGroundLighting_ModDefault = false;
 
 DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 {
@@ -145,6 +152,10 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 
 	Phobos::Config::ShowDesignatorRange = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowDesignatorRange", false);
 	Phobos::Config::ShowPowerPlantEnhancerRange = CCINIClass::INI_RA2MD.ReadBool(phobosSection, "ShowPowerPlantEnhancerRange", false);
+	SmoothGroundLighting_PlayerSet = CCINIClass::INI_RA2MD.Exists(phobosSection, "SmoothGroundLighting");
+	Phobos::Config::SmoothGroundLighting = SmoothGroundLighting_PlayerSet
+		? CCINIClass::INI_RA2MD.ReadBool(phobosSection, "SmoothGroundLighting", false)
+		: SmoothGroundLighting_ModDefault;
 
 	CCINIClass ini_uimd {};
 	ini_uimd.LoadFromFile(GameStrings::UIMD_INI);
@@ -275,6 +286,11 @@ DEFINE_HOOK(0x52D21F, InitRules_ThingsThatShouldntBeSerailized, 0x6)
 	Phobos::Config::ArtImageSwap = pINI_RULESMD->ReadBool(GameStrings::General, "ArtImageSwap", false);
 	Phobos::Config::UnitPowerDrain = pINI_RULESMD->ReadBool(GameStrings::General, "UnitPowerDrain", false);
 
+	SmoothGroundLighting_ModDefault = pINI_RULESMD->ReadBool(GameStrings::AudioVisual, "SmoothGroundLighting", false);
+
+	if (!SmoothGroundLighting_PlayerSet)
+		Phobos::Config::SmoothGroundLighting = SmoothGroundLighting_ModDefault;
+
 	Phobos::Misc::CustomGS = pINI_RULESMD->ReadBool(GameStrings::General, "CustomGS", false);
 
 	char tempBuffer[26];
@@ -314,6 +330,7 @@ DEFINE_HOOK(0x52D21F, InitRules_ThingsThatShouldntBeSerailized, 0x6)
 	Phobos::Config::QuickSaveCommand = pINI_RULESMD->ReadBool("GlobalControls", "QuickSaveKeyEnabled", Phobos::Config::QuickSaveCommand);
 	Phobos::Config::ToggleDigitalDisplayCommand = pINI_RULESMD->ReadBool("GlobalControls", "ToggleDigitalDisplayKeyEnabled", Phobos::Config::ToggleDigitalDisplayCommand);
 	Phobos::Config::ToggleDesignatorRangeCommand = pINI_RULESMD->ReadBool("GlobalControls", "ToggleDesignatorRangeKeyEnabled", Phobos::Config::ToggleDesignatorRangeCommand);
+	Phobos::Config::ToggleSmoothGroundLightingCommand = pINI_RULESMD->ReadBool("GlobalControls", "ToggleSmoothGroundLightingKeyEnabled", Phobos::Config::ToggleSmoothGroundLightingCommand);
 	Phobos::Config::ToggleMessageListCommand = pINI_RULESMD->ReadBool("GlobalControls", "ToggleMessageListKeyEnabled", Phobos::Config::ToggleMessageListCommand);
 	Phobos::Config::ToggleSuperWeaponSidebarCommand = pINI_RULESMD->ReadBool("GlobalControls", "ToggleSuperWeaponSidebarKeyEnabled", Phobos::Config::ToggleSuperWeaponSidebarCommand);
 	Phobos::Config::DeselectObjectCommand = pINI_RULESMD->ReadBool("GlobalControls", "DeselectObjectKeysEnabled", Phobos::Config::DeselectObjectCommand);

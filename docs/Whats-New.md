@@ -177,6 +177,7 @@ CampaignDefaultGameSpeed=4       ; integer
 ShowBriefing=true                ; boolean
 DigitalDisplay.Enable=false      ; boolean
 ShowDesignatorRange=false        ; boolean
+;SmoothGroundLighting=false      ; boolean, leave the key out to use the mod's default
 PrioritySelectionFiltering=true  ; boolean
 PriorityDeployFiltering=true     ; boolean
 ShowPlacementPreview=yes         ; boolean
@@ -2078,6 +2079,7 @@ PreserveCSFWhitespace=false      ; boolean
 - [Locomotor warheads can ignore the target's speed modifiers when pulling it](Fixed-or-Improved-Logics.md#customizing-locomotor-warhead) (by CyberCABAL)
 - [Building art facings: a BuildingType can pick its image and certain properties per building from the facing it is placed with](New-or-Enhanced-Logics.md#building-art-facings) (by CyberCABAL)
 - [Vehicle transports can unload without turning first](New-or-Enhanced-Logics.md#turn-to-unload) (by CyberCABAL)
+- [Smooth ground lighting between cells, with a toggle hotkey](User-Interface.md#smooth-ground-lighting) (by CyberCABAL)
 
 #### Vanilla fixes:
 - Fixed the bug that buildings with passengers cannot unload via the Deploy hotkey or command bar button (by Noble_Fish)

@@ -47,6 +47,7 @@
     <ClCompile Include="src\Commands\ToggleDesignatorRange.cpp" />
     <ClCompile Include="src\Commands\ToggleDigitalDisplay.cpp" />
     <ClCompile Include="src\Commands\ToggleMessageList.cpp" />
+    <ClCompile Include="src\Commands\ToggleSmoothGroundLighting.cpp" />
     <ClCompile Include="src\Commands\ToggleSWSidebar.cpp" />
     <!-- src\Ext -->
     <!-- src\Ext\Aircraft -->
@@ -270,6 +271,7 @@
     <ClCompile Include="src\Misc\Hooks.MessageList.cpp" />
     <ClCompile Include="src\Misc\Hooks.Overlay.cpp" />
     <ClCompile Include="src\Misc\Hooks.PCX.cpp" />
+    <ClCompile Include="src\Misc\Hooks.SmoothGroundLighting.cpp" />
     <ClCompile Include="src\Misc\Hooks.Timers.cpp" />
     <ClCompile Include="src\Misc\Hooks.UI.cpp" />
     <ClCompile Include="src\Misc\Hooks.VeinholeMonster.cpp" />
@@ -347,6 +349,7 @@
     <ClInclude Include="src\Commands\ToggleDesignatorRange.h" />
     <ClInclude Include="src\Commands\ToggleDigitalDisplay.h" />
     <ClInclude Include="src\Commands\ToggleMessageList.h" />
+    <ClInclude Include="src\Commands\ToggleSmoothGroundLighting.h" />
     <ClInclude Include="src\Commands\ToggleSWSidebar.h" />
     <!-- src\Ext -->
     <ClInclude Include="src\Ext\Aircraft\Body.h" />

@@ -99,6 +99,7 @@ public:
 		static int CampaignDefaultGameSpeed;
 		static bool SkirmishUnlimitedColors;
 		static bool ShowDesignatorRange;
+		static bool SmoothGroundLighting;
 		static bool ShowPowerPlantEnhancerRange;
 		static bool SaveVariablesOnScenarioEnd;
 		static bool SaveGameOnScenarioStart;
@@ -122,6 +123,7 @@ public:
 		static bool QuickSaveCommand;
 		static bool ToggleDigitalDisplayCommand;
 		static bool ToggleDesignatorRangeCommand;
+		static bool ToggleSmoothGroundLightingCommand;
 		static bool ToggleMessageListCommand;
 		static bool ToggleSuperWeaponSidebarCommand;
 		static bool DeselectObjectCommand;
