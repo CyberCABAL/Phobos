@@ -235,6 +235,53 @@ DEFINE_HOOK(0x54B4F2, JumpjetLocomotionClass_Stop_Moving_KeepLanding, 0x9)
 	return 0;
 }
 
+// All vehicles in a cell share one occupation bit, so releasing a jumpjet's landing cell also cleared it for a vehicle
+// that had moved in after the jumpjet reserved the cell. The jumpjet then kept picking that cell as a free landing spot
+// and hovered above it until the vehicle left. Mark the cell again for the vehicles still standing in it.
+static void RemarkOtherVehicles(const FootClass* pJumpjet, const CoordStruct& coords)
+{
+	auto const pCell = MapClass::Instance.GetCellAt(coords);
+
+	for (auto pObject : { pCell->FirstObject, pCell->AltObject })
+	{
+		for (; pObject; pObject = pObject->NextObject)
+		{
+			if (pObject != pJumpjet && pObject->WhatAmI() == AbstractType::Unit && !pObject->IsInAir()
+				&& CellClass::Coord2Cell(pObject->Location) == pCell->MapCoords)
+			{
+				pObject->MarkAllOccupationBits(pObject->Location);
+			}
+		}
+	}
+}
+
+DEFINE_HOOK(0x54B214, JumpjetLocomotionClass_Move_To_RemarkOtherVehicles, 0x6)
+{
+	GET(ILocomotion*, iLoco, ESI);
+	auto const pThis = static_cast<JumpjetLocomotionClass*>(iLoco);
+
+	RemarkOtherVehicles(pThis->LinkedTo, pThis->DestinationCoords);
+	return 0;
+}
+
+DEFINE_HOOK(0x54B537, JumpjetLocomotionClass_Stop_Moving_RemarkOtherVehicles, 0x7)
+{
+	GET(ILocomotion*, iLoco, EDI);
+	auto const pThis = static_cast<JumpjetLocomotionClass*>(iLoco);
+
+	RemarkOtherVehicles(pThis->LinkedTo, pThis->DestinationCoords);
+	return 0;
+}
+
+DEFINE_HOOK(0x54D99C, JumpjetLocomotionClass_Mark_All_Occupation_Bits_RemarkOtherVehicles, 0x7)
+{
+	GET(ILocomotion*, iLoco, ESI);
+	GET_STACK(const CoordStruct, coords, 0x4); // The cell just unmarked
+
+	RemarkOtherVehicles(static_cast<JumpjetLocomotionClass*>(iLoco)->LinkedTo, coords);
+	return 0;
+}
+
 // Fix initial facing when jumpjet locomotor is being attached
 DEFINE_HOOK(0x54AE44, JumpjetLocomotionClass_LinkToObject_FixFacing, 0x7)
 {
