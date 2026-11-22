@@ -1051,3 +1051,4 @@ This page lists all the individual contributions to the project by their author.
   - Magnetron beam height fix, and keeping magnetron beams while a locomotor warhead holds the target
   - Building art facings (`Art.Facings`)
   - Vehicle transport unload direction and crowding fixes, `TurnToUnload`
+  - Jumpjets finishing their landing when told to deploy or stop

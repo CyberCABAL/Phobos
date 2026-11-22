@@ -209,6 +209,32 @@ DEFINE_HOOK(0x54DAC4, JumpjetLocomotionClass_EndPiggyback_Blyat, 0x6)
 	return 0;
 }
 
+// A jumpjet told to stop while coming down to land, which a deploy or stop order does by clearing its destination,
+// looked for the nearest free cell again and flew to its center, climbing back up and turning to face it.
+// If it has already reserved its landing cell and the descent (0x54C65F) would still land there, let it finish landing.
+DEFINE_HOOK(0x54B4F2, JumpjetLocomotionClass_Stop_Moving_KeepLanding, 0x9)
+{
+	enum { SkipGameCode = 0x54B6D6 };
+
+	GET(ILocomotion*, iLoco, EDI);
+	auto const pThis = static_cast<JumpjetLocomotionClass*>(iLoco);
+
+	if (pThis->State != JumpjetLocomotionClass::State::Descending || !pThis->DestinationReached)
+		return 0;
+
+	auto const pLinkedTo = pThis->LinkedTo;
+
+	if (pLinkedTo->IsAttackedByLocomotor)
+		return 0;
+
+	auto const pCell = MapClass::Instance.GetCellAt(pThis->DestinationCoords);
+
+	if (pCell->ContainsBridge() || pLinkedTo->IsCellOccupied(pCell, FacingType::None, -1, nullptr, true) <= Move::MovingBlock)
+		return SkipGameCode;
+
+	return 0;
+}
+
 // Fix initial facing when jumpjet locomotor is being attached
 DEFINE_HOOK(0x54AE44, JumpjetLocomotionClass_LinkToObject_FixFacing, 0x7)
 {

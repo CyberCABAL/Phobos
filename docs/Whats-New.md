@@ -2107,6 +2107,7 @@ PreserveCSFWhitespace=false      ; boolean
 - Fixed vehicle transports waiting for their turret, not their body, to finish turning before letting passengers out (by CyberCABAL)
 - Fixed vehicle transports turning to unload towards cells their passengers cannot get out to, such as walls or terrain objects (by CyberCABAL)
 - Fixed passengers never getting out right behind the transport when they could not move further out on any side (by CyberCABAL)
+- Fixed jumpjets told to deploy or stop while landing turning around instead of finishing their landing (by CyberCABAL)
 - Vehicle transports with no free cell to unload into now ask nearby allies to make room before giving up (by CyberCABAL)
 
 #### Phobos fixes:

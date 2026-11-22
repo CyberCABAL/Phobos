@@ -357,6 +357,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed vehicle transports waiting for their turret, not their body, to finish turning before letting passengers out.
 - Fixed vehicle transports turning to unload towards cells their passengers cannot get out to, such as walls or terrain objects. Cells the passengers can also move on from are now preferred, as passengers try those first.
 - Fixed passengers never getting out right behind the transport when they could not move further out on any side.
+- Fixed jumpjets told to deploy or stop while landing turning around instead of finishing their landing.
 - Vehicle transports with no free cell next to them now ask the allied units there to make room and retry up to 5 times before giving up. Units asked to make room for passengers no longer leave missions with `Scatter=no`, such as Sleep or Unload.
 
 ## Fixes / interactions with other extensions
