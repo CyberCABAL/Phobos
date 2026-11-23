@@ -1053,3 +1053,4 @@ This page lists all the individual contributions to the project by their author.
   - Vehicle transport unload direction and crowding fixes, `TurnToUnload`
   - Jumpjet landing fixes (deploying or stopping while landing, vehicles moving into the landing cell, turning on the ground after landing mid-turn)
   - Smooth ground lighting
+  - Fix elevation range bonus and force-fire range for high bridges and water tiles

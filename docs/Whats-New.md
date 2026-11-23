@@ -2113,6 +2113,8 @@ PreserveCSFWhitespace=false      ; boolean
 - Fixed landing jumpjets hovering over a vehicle that drove into their landing cell instead of picking another cell (by CyberCABAL)
 - Fixed jumpjets landing mid-turn and then turning further on the ground without their shadow (by CyberCABAL)
 - Vehicle transports with no free cell to unload into now ask nearby allies to make room before giving up (by CyberCABAL)
+- Fixed the elevation range bonus using the wrong height on high bridges, and missing when force-firing at open water (by CyberCABAL)
+- Fixed weapon range to force-fired cells on high bridges over water being measured to the water (by CyberCABAL)
 
 #### Phobos fixes:
 - Fixed a game crash when parsing string list with null entry (by Ollerus)

@@ -361,6 +361,8 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed landing jumpjets hovering over a vehicle that drove into their landing cell instead of picking another cell.
 - Fixed jumpjets landing mid-turn and then turning further on the ground without their shadow. They now stop turning when they touch down. Jumpjets on the ground turning to their target with `OmniFire.TurnToTarget` now turn their shadow too.
 - Vehicle transports with no free cell next to them now ask the allied units there to make room and retry up to 5 times before giving up. Units asked to make room for passengers no longer leave missions with `Scatter=no`, such as Sleep or Unload.
+- Fixed the elevation range bonus (`[ElevationModel]`) using the wrong height on high bridges and water. Only the middle lane of high bridges counted as raised. Force-firing at open water now also gets the bonus.
+- Fixed weapon range to a force-fired cell on a high bridge over water being measured to the water instead of the bridge deck.
 
 ## Fixes / interactions with other extensions
 

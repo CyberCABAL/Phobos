@@ -187,6 +187,88 @@ DEFINE_HOOK(0x6F7294, TechnoClass_InRange_OccupyRange, 0x5)
 	return SkipGameCode;
 }
 
+// InRange raises targets on the floor to the deck on bridge deck cells, but cells over water say they
+// are not on the floor, so range to a deck cell over water was measured at the water.
+DEFINE_HOOK(0x6F732F, TechnoClass_InRange_BridgeDeckCellTarget, 0x5)
+{
+	enum { OnFloor = 0x6F7336, NotOnFloor = 0x6F7375 };
+
+	GET(AbstractClass* const, pTarget, ESI);
+
+	if (pTarget->IsOnFloor())
+		return OnFloor;
+
+	const auto pCell = abstract_cast<CellClass*>(pTarget);
+	return pCell && pCell->ContainsBridge() ? OnFloor : NotOnFloor;
+}
+
+#pragma region ElevationBonus
+
+// Reimplements InRange's range bonus for SubjectToElevation=yes projectiles fired from higher ground.
+// Vanilla counted a high bridge only on its middle lane. Objects now count it whenever they are on it,
+// and cells on every deck lane, matching where InRange measures to.
+namespace ElevationBonus
+{
+	static int GetLevel(AbstractClass* pAbstract)
+	{
+		if (const auto pCell = abstract_cast<CellClass*>(pAbstract))
+			return pCell->GetLevel(); // Counts the bridge deck on every lane.
+
+		const auto pCell = MapClass::Instance.GetCellAt(pAbstract->GetCoords());
+		const auto pObject = abstract_cast<ObjectClass*>(pAbstract);
+
+		// Anything that is not an object keeps the vanilla middle lane check.
+		const bool onBridge = pObject ? pObject->OnBridge : (pCell->Flags & CellFlags::BridgeOwner) != CellFlags::Empty;
+
+		return pCell->Level + (onBridge ? CellClass::BridgeLevels : 0);
+	}
+
+	// Returns the bonus in whole cells and outputs the level difference it was computed from.
+	static int GetBonusCells(TechnoClass* pThis, AbstractClass* pTarget, int& levelDifference)
+	{
+		levelDifference = 0;
+
+		// Cells count as on the floor even on water, so force-firing at open water gets the bonus a ship there would.
+		const bool targetOnFloor = pTarget->WhatAmI() == AbstractType::Cell || pTarget->IsOnFloor();
+
+		if (!pThis->IsOnFloor() || !targetOnFloor)
+			return 0;
+
+		const auto pRules = RulesClass::Instance;
+
+		// Vanilla would divide by zero here.
+		if (pRules->ElevationIncrement <= 0)
+			return 0;
+
+		levelDifference = std::max(GetLevel(pThis) - GetLevel(pTarget), 0);
+		const double bonus = (levelDifference / pRules->ElevationIncrement) * pRules->ElevationIncrementBonus;
+
+		return static_cast<int>(std::min(bonus, pRules->ElevationBonusCap));
+	}
+
+	// Non-arcing projectiles: InRange measures 3D distance, so the height difference is added too.
+	static int __fastcall GetBonus(TechnoClass* pThis, void*, AbstractClass* pTarget)
+	{
+		int levelDifference = 0;
+		const int bonus = GetBonusCells(pThis, pTarget, levelDifference) * Unsorted::LeptonsPerCell;
+		const int height = levelDifference * Unsorted::LevelHeight;
+
+		return static_cast<int>(Math::sqrt(static_cast<double>(bonus * bonus + height * height)));
+	}
+
+	// Arcing projectiles: InRange measures 2D distance.
+	static int __fastcall GetBonusArcing(TechnoClass* pThis, void*, AbstractClass* pTarget)
+	{
+		int levelDifference = 0;
+		return GetBonusCells(pThis, pTarget, levelDifference) * Unsorted::LeptonsPerCell;
+	}
+}
+
+DEFINE_FUNCTION_JUMP(LJMP, 0x6F6F60, ElevationBonus::GetBonus)
+DEFINE_FUNCTION_JUMP(LJMP, 0x6F70E0, ElevationBonus::GetBonusArcing)
+
+#pragma endregion
+
 DEFINE_HOOK(0x6FC3A1, TechnoClass_CanFire_InBunkerRangeCheck, 0x5)
 {
 	enum { ContinueChecks = 0x6FC3C5, CannotFire = 0x6FC86A };
